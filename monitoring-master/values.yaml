@@ -86,7 +86,7 @@ prometheus:
         kuberentes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
-        external-dns.alpha.kubernetes.io/target: target
+          #        external-dns.alpha.kubernetes.io/target: target
         nginx.ingress.kubernetes.io/auth-type: basic
         nginx.ingress.kubernetes.io/auth-secret: ceritsc-federated-prometheus-auth
       hosts:
@@ -150,7 +150,7 @@ loki:
       kuberentes.io/ingress.class: "nginx"
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
-      external-dns.alpha.kubernetes.io/target: target
+        #      external-dns.alpha.kubernetes.io/target: target
       nginx.ingress.kubernetes.io/auth-type: basic
       nginx.ingress.kubernetes.io/auth-secret: ceritsc-loki-auth
     hosts:
@@ -220,7 +220,7 @@ grafana:
         kuberentes.io/ingress.class: "nginx"
         kubernetes.io/tls-acme: "true"
         cert-manager.io/cluster-issuer: "letsencrypt-prod"
-        external-dns.alpha.kubernetes.io/target: target
+          #        external-dns.alpha.kubernetes.io/target: target
     hosts:
       - "grafana-address"
     tls:
