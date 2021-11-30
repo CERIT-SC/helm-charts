@@ -1,0 +1,6 @@
+# Ignore everything
+*
+
+# Do not ignore packaged charts
+!*.tgz
+!index.yaml
