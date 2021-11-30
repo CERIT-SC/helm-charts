@@ -3,7 +3,27 @@ entries:
   monitoring-master:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-11-30T14:25:35.849666557+01:00"
+    created: "2021-11-30T17:39:10.187133687+01:00"
+    dependencies:
+    - name: grafana
+      repository: https://grafana.github.io/helm-charts
+      version: 6.16.10
+    - name: loki
+      repository: https://grafana.github.io/helm-charts
+      version: 2.6.0
+    - name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 14.8.1
+    description: A Helm chart for Kubernetes
+    digest: 956f2e75d72f6b51ff1249643b31fc03a004d5a790729a8b198d84d0fc45214d
+    name: monitoring-master
+    type: application
+    urls:
+    - monitoring-master-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2021-11-30T17:39:10.17510504+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -24,7 +44,7 @@ entries:
   monitoring-worker:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-11-30T14:25:35.861857917+01:00"
+    created: "2021-11-30T17:39:10.206575046+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -39,4 +59,4 @@ entries:
     urls:
     - monitoring-worker-0.1.2.tgz
     version: 0.1.2
-generated: "2021-11-30T14:25:35.826001078+01:00"
+generated: "2021-11-30T17:39:10.16386813+01:00"
