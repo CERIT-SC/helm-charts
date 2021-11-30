@@ -1,0 +1,10 @@
+groups:
+  - name: LokiLogs
+    interval: 1m
+    rules:
+      - record: loki:segfaults:count:5m
+        expr: |
+          sum(count_over_time({job="systemd-journal"}[5m] |= "segfault")) by (nodename)
+      - record: loki:oom:count:5m
+        expr: |
+          sum(count_over_time({source="promtail", job="systemd-journal"}[5m] |= "oom-kill:")) by (nodename)

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ceritsc-federated-prometheus-auth
+  namespace: {{ $.Release.Namespace }}
+type: Opaque
+data:
+   auth: {{ (htpasswd .Values.global.prometheusUser .Values.global.prometheusPassword) | b64enc | quote }}
+

@@ -1,0 +1,302 @@
+deployment:
+  name: monitoring-master
+  replicas: 1
+
+name: monitoring-master
+
+global:
+  lokiUser: lokiname
+  lokiPassword: lokipassword
+  prometheusUser: prometheusname
+  prometheusPassword: prometheuspassword
+
+prometheus_rules:
+  fedrules:
+    label: null
+    file: rules/fedrules.yaml
+
+loki_rules:
+  recordrules:
+    label: null
+    file: rules/loki.yaml
+
+prometheus:
+  serviceAccounts:
+    alertmanager:
+      create: false
+    nodeExporter:
+      create: false
+    pushgateway:
+      create: false
+    server:
+      create: true
+
+  alertmanager:
+    enabled: false
+
+  configmapReload:
+    prometheus:
+      enabled: true
+      name: configmap-reload-federated
+      image:
+        repository: jimmidyson/configmap-reload
+        tag: v0.5.0
+        pullPolicy: IfNotPresent
+      extraConfigmapMounts:
+        - name: ceritsc-fedrules
+          mountPath: /etc/config_custom
+          configMap: ceritsc-master-prometheus-rules-fedrules
+          readOnly: true
+      extraArgs:
+        volume-dir: /etc/config_custom
+    alertmanager:
+      enabled: false
+
+  kubeStateMetrics:
+    enabled: false
+  nodeExporter:
+    enabled: false
+
+  server:
+    extraArgs:
+      enable-feature: remote-write-receiver
+    extraConfigmapMounts:
+      - name: ceritsc-fedrules
+        mountPath: /etc/config_custom
+        configMap: ceritsc-master-prometheus-rules-fedrules
+        readOnly: true
+    strategy:
+      type: Recreate
+    enabled: true
+    retention: 365d
+
+    name: server-federated
+
+    baseURL: "https://federated-prometheus-address"
+
+    global:
+      # TODO maybe change to 5m
+      scrape_interval: 2m
+      scrape_timeout: 2m
+      evaluation_interval: 2m
+
+    ingress:
+      enabled: true
+      annotations:
+        kuberentes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        external-dns.alpha.kubernetes.io/target: target
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-secret: ceritsc-federated-prometheus-auth
+      hosts:
+        - "federated-prometheus-address"
+      tls:
+        - secretName: federated-prometheus-address-tls
+          hosts:
+            - "federated-prometheus-address"
+
+    persistentVolume:
+      enabled: true
+      accessModes:
+        - ReadWriteOnce
+      size: 1Ti
+      storageClass: "nfs-csi"
+  pushgateway:
+    enabled: false
+
+  serverFiles:
+    prometheus.yml:
+      rule_files:
+        - /etc/config_custom/fedrules.yml
+      scrape_configs:
+        - job_name: prometheus
+          static_configs:
+            - targets:
+              - localhost:9090
+        - job_name: 'general-cluster-scrape'
+          metrics_path: /federate
+          honor_labels: true
+          params:
+            'match[]':
+              - '{__name__=~".+", fedscrape=""}'
+          basic_auth:
+            username: prometheusname
+            password: prometheuspassword
+          static_configs:
+            - targets:
+                - "worker1-address"
+                - "worker2-address"
+        - job_name: '2m-cluster-scrape'
+          scrape_interval: 2m
+          scrape_timeout: 110s
+          metrics_path: /federate
+          honor_labels: true
+          params:
+            'match[]':
+              - '{fedscrape="1m"}'
+          basic_auth:
+            username: prometheusname
+            password: prometheuspassword
+          static_configs:
+            - targets:
+                - "worker1-address"
+                - "worker2-address"
+
+loki:
+  ingress:
+    enabled: true
+    annotations:
+      kuberentes.io/ingress.class: "nginx"
+      kubernetes.io/tls-acme: "true"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      external-dns.alpha.kubernetes.io/target: target
+      nginx.ingress.kubernetes.io/auth-type: basic
+      nginx.ingress.kubernetes.io/auth-secret: ceritsc-loki-auth
+    hosts:
+      - host: "loki-address"
+        paths:
+          - /
+    tls: 
+      - secretName: loki-address-tls
+        hosts:
+          - "loki-address"
+
+  config:
+    limits_config:
+      ingestion_rate_mb: 200
+      ingestion_burst_size_mb: 40
+      max_concurrent_tail_requests: 40
+      max_cache_freshness_per_query: 10m
+    ruler:
+      storage:
+        type: local
+        local:
+          directory: /rules
+      rule_path: /tmp/rules
+      remote_write:
+        enabled: true
+        client:
+          url: federated-prometheus-address/api/v1/write
+          basic_auth:
+            username: prometheusname
+            password: prometheuspassword
+
+  extraVolumes:
+    - name: recordingrules
+      configMap:
+        name: ceritsc-master-loki-rules-recordrules
+    - name: temp
+      emptyDir: {}
+
+  extraVolumeMounts:
+    - name: recordingrules
+      mountPath: /rules
+    - name: temp
+      mountPath: /tmp
+
+  persistence:
+    enabled: true
+    accessModes:
+    - ReadWriteOnce
+    size: 2Ti
+    storageClass: "nfs-csi"
+
+grafana:
+  sidecar:
+    resources:
+     limits:
+       cpu: 100m
+       memory: 100Mi
+     requests:
+       cpu: 50m
+       memory: 50Mi
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+  ingress:
+    enabled: true
+    annotations:
+        kuberentes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        external-dns.alpha.kubernetes.io/target: target
+    hosts:
+      - "grafana-address"
+    tls:
+      - secretName: grafana-address-tls
+        hosts:
+          - "grafana-address"
+  adminUser: adminuser
+  adminPassword: adminpassword
+
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - name: Prometheus
+        type: prometheus
+        url: prometheus-address
+        access: proxy
+        isDefault: true
+        basicAuth: true
+        basicAuthUser: prometheusname
+        basicAuthPassword: prometheuspassword
+      - name: Loki
+        type: loki
+        url: loki-address
+        access: proxy
+        isDefault: false
+        basicAuth: true
+        basicAuthUser: lokiname
+        basicAuthPassword: lokipassword
+
+  grafana.ini:
+    dashboards:
+      default_home_dashboard_path: /tmp/dashboards/home.json
+
+dashboards:
+  default:
+    coredns:
+      file: "dashboards/CoreDNS.json"
+    etcd:
+      file: "dashboards/etcd.json"
+    home:
+      file: "dashboards/Home.json"
+    istio-control:
+      file: "dashboards/Istio Control Plane Dashboard.json"
+    istio-mesh:
+      file: "dashboards/Istio Mesh Dashboard.json"
+    istio-performance:
+      file: "dashboards/Istio Performance Dashboard.json"
+    istio-service:
+      file: "dashboards/Istio Service Dashboard.json"
+    istio-workload:
+      file: "dashboards/Istio Workload Dashboard.json"
+    kubernetes-api:
+      file: "dashboards/Kubernetes _ API server.json"
+    kubernetes-kubelet:
+      file: "dashboards/Kubernetes _ Kubelet.json"
+    kubernetes-proxy:
+      file: "dashboards/Kubernetes _ Proxy.json"
+    kubernetes-scheduler:
+      file: "dashboards/Kubernetes _ Scheduler.json"
+    kubernetes-statefulsets:
+      file: "dashboards/Kubernetes _ StatefulSets.json"
+    log-info:
+      file: "dashboards/Log info.json"
+    nginx-ingress:
+      file: "dashboards/NGINX _ Ingress Controller.json"
+    nginx-request:
+      file: "dashboards/NGINX _ Request Handling Performance.json"
+    overview-cluster:
+      file: "dashboards/Overview _ Cluster.json"
+    overview-namespace:
+      file: "dashboards/Overview _ Namespace.json"
+    overview-node:
+      file: "dashboards/Overview _ Node.json"
+    overview-prometheus:
+      file: "dashboards/Overview _ Prometheus.json"
+    overview-workload:
+      file: "dashboards/Overview _ Workload.json"
+dashboardslabel: "grafana_dashboard"

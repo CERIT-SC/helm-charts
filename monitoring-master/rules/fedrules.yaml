@@ -1,0 +1,9 @@
+groups:
+    - name: loki
+      rules:
+      - expr:
+          instance_schedulable * on(instance) group_left() sum(label_replace(loki:segfaults:count:5m, "instance", "$1", "nodename", "(.*)")) by (instance) or on (instance) ((instance_schedulable == 1) * 0)
+        record: loki:segfaults:count:5m:schedulable
+      - expr:
+          instance_schedulable * on(instance) group_left() sum(label_replace(loki:oom:count:5m, "instance", "$1", "nodename", "(.*)")) by (instance) or on (instance) ((instance_schedulable == 1) * 0)
+        record: loki:oom:count:5m:schedulable

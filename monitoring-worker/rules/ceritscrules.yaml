@@ -1,0 +1,2572 @@
+groups:
+    - name: my_custom
+      rules:
+      # is node schedulable ?
+      - expr: |
+          sum((kube_node_spec_unschedulable + 1) % 2) by (node)
+        labels:
+          fedscrape: "1m"
+        record: node_schedulable
+      - expr: |
+          sum(label_replace(node_schedulable, "kubernetes_node", "$1", "node", "(.*)")) by (kubernetes_node)
+        labels:
+          fedscrape: "1m"
+        record: kubernetes_node_schedulable
+      - expr: |
+          sum(label_replace(node_schedulable, "instance", "$1", "node", "(.*)")) by (instance)
+        labels:
+          fedscrape: "1m"
+        record: instance_schedulable
+
+      # for grafana to allow node selection in Overview / Node
+      - expr: |
+          node_schedulable > 0
+        labels:
+          fedscrape: "1m"
+        record: schedulable_nodes
+
+      - expr: |
+          topk(1, node_container_cpu_limits_usage{pod!~"promtail.*"} > bool 0.9) by (node)
+        labels:
+          fedscrape: "1m"
+          dashes: "false"
+        record: node_container_cpu_limits_usage:above:90:pods
+      - expr: |
+          node_schedulable * on(node) group_right() node_container_cpu_limits_usage:above:90:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+        labels:
+          fedscrape: "1m"
+          dashes: "true"
+        record: node_container_cpu_limits_usage:above:90:pods
+      - expr: |
+          topk(1, node_container_cpu_requests_usage{pod!~"promtail.*"} > bool 1) by (node)
+        labels:
+          fedscrape: "1m"
+          dashes: "false"
+        record: node_container_cpu_requests_usage:above:100:pods
+      - expr: |
+          node_schedulable * on(node) group_right() node_container_cpu_requests_usage:above:100:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+        labels:
+          fedscrape: "1m"
+          dashes: "true"
+        record: node_container_cpu_requests_usage:above:100:pods
+      - expr: |
+          topk(1, node_container_memory_limits_usage > bool 0.9) by (node)
+        labels:
+          fedscrape: "1m"
+          dashes: "false"
+        record: node_container_memory_limits_usage:above:90:pods
+      - expr: |
+          node_schedulable * on(node) group_right() node_container_memory_limits_usage:above:90:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+        labels:
+          fedscrape: "1m"
+          dashes: "true"
+        record: node_container_memory_limits_usage:above:90:pods
+      - expr: |
+          topk(1, node_container_memory_requests_usage > bool 1) by (node)
+        labels:
+          fedscrape: "1m"
+          dashes: "false"
+        record: node_container_memory_requests_usage:above:100:pods
+      - expr: |
+          node_schedulable * on(node) group_right() node_container_memory_requests_usage:above:100:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+        labels:
+          fedscrape: "1m"
+          dashes: "true"
+        record: node_container_memory_requests_usage:above:100:pods
+
+      # cluster crashloopbackoff count
+      - expr: |
+          count(kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"})
+        labels:
+          fedscrape: "1m"
+        record: cluster_crashloopbackoff:count
+      # cluster desired replicas
+      - expr: |
+          count(kube_deployment_status_replicas{fedscrape=""}/kube_deployment_spec_replicas{fedscrape=""} < 1) by (deployment, namespace)
+        labels:
+          fedscrape: "1m"
+        record: cluster_deployment_without_desired_replicas
+      - expr: |
+          count(kube_daemonset_status_current_number_scheduled{fedscrape=""} / kube_daemonset_status_desired_number_scheduled{fedscrape=""} < 1) by (daemonset, namespace)
+        labels:
+          fedscrape: "1m"
+        record: cluster_daemonset_without_desired_replicas
+      - expr: |
+          count(node_deployment_without_desired_replicas{fedscrape=""}) or vector(0)
+        labels:
+          fedscrape: "1m"
+        record: cluster_deployment_without_desired_replicas:count
+      - expr: |
+          count(node_daemonset_without_desired_replicas{fedscrape=""}) or vector(0)
+        labels:
+          fedscrape: "1m"
+        record: cluster_daemonset_without_desired_replicas:count
+      # cluster cpu
+      - expr: |
+          sum(kube_node_status_allocatable{resource="cpu", fedscrape=""} * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          fedscrape: "1m"
+        record: cluster_cpu_total:hardware:schedulable
+      - expr: |
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total"}[5m]) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          unit: "core"
+          fedscrape: "1m"
+        record: cluster_cpu_total:schedulable
+      - expr: |
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode="idle"}[5m]) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          mode: "idle"
+          unit: "core"
+          fedscrape: "1m"
+        record: cluster_cpu_usage:irate:5m:schedulable
+      - expr: |
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode=~"nice|system|user|irq|softirq"}[5m]) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          mode: "utilized"
+          unit: "core"
+          fedscrape: "1m"
+        record: cluster_cpu_usage:irate:5m:schedulable
+      - expr: |
+          cluster_cpu_usage:irate:5m:schedulable{mode="idle",unit="core"} / ignoring(mode) cluster_cpu_total:schedulable
+        labels:
+          mode: "idle"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: cluster_cpu_usage:irate:5m:schedulable
+      - expr: |
+          cluster_cpu_usage:irate:5m:schedulable{mode="utilized",unit="core"} / ignoring(mode) cluster_cpu_total:schedulable
+        labels:
+          mode: "utilized"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: cluster_cpu_usage:irate:5m:schedulable
+
+      # cluster memory
+      - expr: |
+          sum({__name__=~"node_memory_MemTotal_bytes|windows_cs_physical_memory_bytes"} * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          unit: "byte"
+          fedscrape: "1m"
+        record: cluster_memory_total:schedulable
+      - expr: |
+          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"} * on(kubernetes_node) group_left() kubernetes_node_schedulable) / ignoring(unit, fedscrape) cluster_memory_total:schedulable
+        labels:
+          mode: "free"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: cluster_memory_usage:schedulable
+      - expr: |
+          1 - cluster_memory_usage:schedulable{mode="free",unit="percentage"}
+        labels:
+          mode: "utilized"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: cluster_memory_usage:schedulable
+      - expr: |
+          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"} * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          mode: "free"
+          unit: "byte"
+          fedscrape: "1m"
+        record: cluster_memory_usage:schedulable
+      - expr: |
+          cluster_memory_total:schedulable - ignoring(mode) cluster_memory_usage:schedulable{mode="free",unit="byte"}
+        labels:
+          mode: "utilized"
+          unit: "byte"
+          fedscrape: "1m"
+        record: cluster_memory_usage:schedulable
+
+      # cluster disk
+      - expr: |
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_size_bytes{device=~"/dev/sd.*|/dev/nvme.*", fedscrape=""}) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          unit: "byte"
+          fedscrape: "1m"
+        record: cluster_disk_total:schedulable
+      - expr: |
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() kubernetes_node_schedulable) / ignoring(unit, fedscrape) cluster_disk_total:schedulable
+        labels:
+          mode: "free"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: cluster_disk_usage:schedulable
+      - expr: |
+          1 - cluster_disk_usage:schedulable{mode="free",unit="percentage"}
+        labels:
+          mode: "utilized"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: cluster_disk_usage:schedulable
+      - expr: |
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+        labels:
+          mode: "free"
+          unit: "byte"
+          fedscrape: "1m"
+        record: cluster_disk_usage:schedulable
+      - expr: |
+          cluster_disk_total:schedulable - ignoring(mode) cluster_disk_usage:schedulable{mode="free",unit="byte"}
+        labels:
+          mode: "utilized"
+          unit: "byte"
+          fedscrape: "1m"
+        record: cluster_disk_usage:schedulable
+
+      # pod usage
+      - expr: |
+          sum(kube_node_status_allocatable:schedulable{resource="pods"}) by (node)
+        labels:
+          fedscrape: "1m"
+        record: node_pods_total:schedulable
+      - expr: |
+          sum(label_replace(kubelet_running_pods:schedulable, "node", "$1", "instance", "(.*)")) by (node)
+        labels:
+          mode: "utilized"
+          unit: "pods"
+          fedscrape: "1m"
+        record: node_pods_usage:schedulable
+      - expr: |
+          node_pods_usage:schedulable{mode="utilized",unit="pods"} / ignoring(unit,mode) node_pods_total:schedulable
+        labels:
+          mode: "utilized"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: node_pods_usage:schedulable
+      - expr: |
+          node_pods_total:schedulable - ignoring(unit, mode) node_pods_usage:schedulable{mode="utilized",unit="pods"}
+        labels:
+          mode: "available"
+          unit: "pods"
+          fedscrape: "1m"
+        record: node_pods_usage:schedulable
+      - expr: |
+          1 - node_pods_usage:schedulable{mode="utilized",unit="percentage"}
+        labels:
+          mode: "available"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: node_pods_usage:schedulable
+      - expr: |
+          sum(kube_node_status_allocatable{resource="pods", fedscrape=""}) by (node)
+        labels:
+          fedscrape: "1m"
+        record: node_pods_total
+      - expr: |
+          sum(label_replace(kubelet_running_pods{fedscrape=""}, "node", "$1", "instance", "(.*)")) by (node)
+        labels:
+          mode: "utilized"
+          unit: "pods"
+          fedscrape: "1m"
+        record: node_pods_usage
+      - expr: |
+          node_pods_usage{mode="utilized",unit="pods"} / ignoring(unit,mode) node_pods_total
+        labels:
+          mode: "utilized"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: node_pods_usage
+      - expr: |
+          node_pods_total - ignoring(unit, mode) node_pods_usage{mode="utilized",unit="pods"}
+        labels:
+          mode: "available"
+          unit: "pods"
+          fedscrape: "1m"
+        record: node_pods_usage
+      - expr: |
+          1 - node_pods_usage{mode="utilized",unit="percentage"}
+        labels:
+          mode: "available"
+          unit: "percentage"
+          fedscrape: "1m"
+        record: node_pods_usage
+
+      # namespace stats
+      - expr: |
+          count(count(kube_pod_container_info:schedulable) by (namespace))
+        labels:
+          fedscrape: "1m"
+        record: cluster_namespace_count:schedulable
+
+      # TODO do pods above request, not namespaces
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container!=""} * on(node) group_left() node_schedulable) by (namespace) / sum(kube_pod_container_resource_requests:running{resource="cpu", unit="core"} * on(node) group_left() node_schedulable) by (namespace) > 1
+        labels:
+          fedscrape: "1m"
+        record: namespaces_above_request
+      - expr: |
+          count(namespaces_above_request) or vector(0)
+        labels:
+          fedscrape: "1m"
+        record: namespace_above_request_exists
+
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable{container!=""}) by (namespace)
+        labels:
+          unit: "core"
+          fedscrape: "1m"
+        record: namespace_cpu_usage:schedulable
+      - expr: |
+          namespace_cpu_usage:schedulable{unit="core"} / ignoring(namespace) group_left(unit) cluster_cpu_total:schedulable
+        labels:
+          unit: "percentage"
+          fedscrape: "1m"
+        record: namespace_cpu_usage:schedulable
+      - expr: |
+          sum(node_namespace_pod_container:container_memory_working_set_bytes:schedulable) by (namespace)
+        labels:
+          unit: "byte"
+          fedscrape: "1m"
+        record: namespace_memory_usage:schedulable
+      - expr: |
+          namespace_memory_usage:schedulable{unit="byte"} / ignoring(namespace) group_left(unit) cluster_memory_total:schedulable
+        labels:
+          unit: "percentage"
+          fedscrape: "1m"
+        record: namespace_memory_usage:schedulable
+
+      # nodes
+      - expr: |
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_size_bytes{device=~"/dev/sd.*|/dev/nvme.*", fedscrape=""}) * on(kubernetes_node) group_left() kubernetes_node_schedulable) by (kubernetes_node)
+        labels:
+          unit: "byte"
+          fedscrape: "1m"
+        record: nodes_disk_total:schedulable
+      - expr: |
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() kubernetes_node_schedulable) by (kubernetes_node)
+        labels:
+          unit: "byte"
+          mode: "free"
+          fedscrape: "1m"
+        record: nodes_disk_usage:schedulable
+      - expr: |
+          nodes_disk_total:schedulable - ignoring(mode) nodes_disk_usage:schedulable{unit="byte",mode="free"}
+        labels:
+          unit: "byte"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_disk_usage:schedulable
+      - expr: |
+          nodes_disk_usage:schedulable{unit="byte",mode="free"} / ignoring(mode) nodes_disk_total:schedulable
+        labels:
+          unit: "percentage"
+          mode: "free"
+          fedscrape: "1m"
+        record: nodes_disk_usage:schedulable
+      - expr: |
+          1 - nodes_disk_usage:schedulable{unit="percentage",mode="free"}
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_disk_usage:schedulable
+      - expr: |
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_size_bytes{device=~"/dev/sd.*|/dev/nvme.*", fedscrape=""})) by (kubernetes_node)
+        labels:
+          unit: "byte"
+          fedscrape: "1m"
+        record: nodes_disk_total
+      - expr: |
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"})) by (kubernetes_node)
+        labels:
+          unit: "byte"
+          mode: "free"
+          fedscrape: "1m"
+        record: nodes_disk_usage
+      - expr: |
+          nodes_disk_total - ignoring(mode) nodes_disk_usage{unit="byte",mode="free"}
+        labels:
+          unit: "byte"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_disk_usage
+      - expr: |
+          nodes_disk_usage{unit="byte",mode="free"} / ignoring(mode) nodes_disk_total
+        labels:
+          unit: "percentage"
+          mode: "free"
+          fedscrape: "1m"
+        record: nodes_disk_usage
+      - expr: |
+          1 - nodes_disk_usage{unit="percentage",mode="free"}
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_disk_usage
+      - expr: |
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total"}[5m])) by (kubernetes_node)
+        labels:
+          fedscrape: "1m"
+        record: nodes_cpu_total
+      - expr: |
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode=~"nice|system|user|irq|softirq"}[5m])) by (kubernetes_node) / ignoring(fedscrape) nodes_cpu_total
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          1 - nodes_cpu_usage{unit="percentage", mode="utilized", type="system"}
+        labels:
+          unit: "percentage"
+          mode: "idle"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode=~"nice|system|user|irq|softirq"}[5m])) by (kubernetes_node)
+        labels:
+          unit: "cores"
+          mode: "utilized"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          nodes_cpu_total - ignoring(mode, type, unit) nodes_cpu_usage{unit="cores", mode="utilized", type="system"}
+        labels:
+          unit: "cores"
+          mode: "idle"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          sum({__name__=~"node_memory_MemTotal_bytes|windows_cs_physical_memory_bytes"}) by (kubernetes_node)
+        labels:
+          fedscrape: "1m"
+        record: nodes_memory_total
+      - expr: |
+          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"}) by (kubernetes_node) / ignoring(fedscrape) nodes_memory_total
+        labels:
+          unit: "percentage"
+          mode: "free"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          1 - nodes_memory_usage{unit="percentage", mode="free", type="system"}
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"}) by (kubernetes_node)
+        labels:
+          unit: "bytes"
+          mode: "free"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          nodes_memory_total - ignoring(mode, type, unit) nodes_memory_usage{unit="bytes", mode="free", type="system"}
+        labels:
+          unit: "bytes"
+          mode: "utilized"
+          type: "system"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          sum(label_replace(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate, "kubernetes_node", "$1", "node", "(.*)")) by (kubernetes_node) / ignoring(fedscrape) nodes_cpu_total
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          1 - nodes_cpu_usage{unit="percentage", mode="utilized", type="containers"}
+        labels:
+          unit: "percentage"
+          mode: "idle"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          sum(label_replace(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate, "kubernetes_node", "$1", "node", "(.*)")) by (kubernetes_node)
+        labels:
+          unit: "cores"
+          mode: "utilized"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          nodes_cpu_total - ignoring(mode, type, unit) nodes_cpu_usage{unit="cores", mode="utilized", type="containers"}
+        labels:
+          unit: "cores"
+          mode: "idle"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_cpu_usage
+      - expr: |
+          sum(label_replace(node_namespace_pod_container:container_memory_working_set_bytes, "kubernetes_node", "$1", "node", "(.*)")) by (kubernetes_node) / ignoring(fedscrape) nodes_memory_total
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          1 - nodes_memory_usage{unit="percentage", mode="utilized", type="containers"}
+        labels:
+          unit: "percentage"
+          mode: "free"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          sum(label_replace(node_namespace_pod_container:container_memory_working_set_bytes, "kubernetes_node", "$1", "node", "(.*)")) by (kubernetes_node)
+        labels:
+          unit: "bytes"
+          mode: "utilized"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          nodes_memory_total - ignoring(mode, type, unit) nodes_memory_usage{unit="bytes", mode="utilized", type="containers"}
+        labels:
+          unit: "bytes"
+          mode: "free"
+          type: "containers"
+          fedscrape: "1m"
+        record: nodes_memory_usage
+      - expr: |
+          sum(kube_node_status_allocatable{resource="cpu", fedscrape=""}) by (node)
+        labels:
+          fedscrape: "1m"
+        record: nodes_cpu_total:hardware
+      - expr: |
+          sum(kube_pod_container_resource_requests:running{resource="cpu",unit="core"}) by (node)
+        labels:
+          unit: "cores"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_cpu_requests
+      - expr: |
+          nodes_cpu_requests{unit="cores", mode="utilized"} / on(node) group_left() nodes_cpu_total:hardware
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_cpu_requests
+      - expr: |
+          sum(kube_node_status_allocatable{resource="memory", fedscrape=""}) by (node)
+        labels:
+          fedscrape: "1m"
+        record: nodes_memory_total:hardware
+      - expr: |
+          sum(kube_pod_container_resource_requests:running{resource="memory",unit="byte"}) by (node)
+        labels:
+          unit: "bytes"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_memory_requests
+      - expr: |
+          nodes_memory_requests{unit="bytes", mode="utilized"} / on(node) group_left() nodes_memory_total:hardware
+        labels:
+          unit: "percentage"
+          mode: "utilized"
+          fedscrape: "1m"
+        record: nodes_memory_requests
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate) by (container, pod, namespace, node) / sum(kube_pod_container_resource_requests:running{resource="cpu",unit="core"}) by (container, pod, namespace, node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_cpu_requests_usage
+      - expr: |
+          sum(node_namespace_pod_container:container_memory_working_set_bytes{container!=""}) by (container, pod, namespace, node) / sum(kube_pod_container_resource_requests:running{resource="memory",unit="byte"}) by (container, pod, namespace, node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_memory_requests_usage
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate) by (container, pod, namespace, node) / sum(kube_pod_container_resource_limits:running{resource="cpu",unit="core"}) by (container, pod, namespace, node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_cpu_limits_usage
+      - expr: |
+          sum(node_namespace_pod_container:container_memory_working_set_bytes{container!=""}) by (container, pod, namespace, node) / sum(kube_pod_container_resource_limits:running{resource="memory",unit="byte"}) by (container, pod, namespace, node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_memory_limits_usage
+      - expr: |
+          sum(node_container_cpu_requests_usage > bool 1) by (node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_cpu_requests_usage:above:100
+      - expr: |
+          sum(node_container_memory_requests_usage > bool 1) by (node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_memory_requests_usage:above:100
+      - expr: |
+          sum(node_container_cpu_limits_usage > bool 0.9) by (node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_cpu_limits_usage:above:90
+      - expr: |
+          sum(node_container_memory_limits_usage > bool 0.9) by (node)
+        labels:
+          fedscrape: "1m"
+        record: node_container_memory_limits_usage:above:90
+
+      # pods
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate) by (node,pod,namespace) / sum(kube_pod_container_resource_requests:running{resource="cpu",unit="core"}) by (node,pod,namespace)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_requests
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate) by (node,pod,namespace) / sum(kube_pod_container_resource_limits:running{resource="cpu",unit="core"}) by (node,pod,namespace)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_limits
+      - expr: |
+          max(pod_namespace_cpu_usage_requests) by (node)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_requests:max
+      - expr: |
+          max(pod_namespace_cpu_usage_limits) by (node)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_limits:max
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable) by (node,pod,namespace) / sum(kube_pod_container_resource_requests:running:schedulable{resource="cpu",unit="core"}) by (node,pod,namespace)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_requests:schedulable
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable) by (node,pod,namespace) / sum(kube_pod_container_resource_limits:running:schedulable{resource="cpu",unit="core"}) by (node,pod,namespace)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_limits:schedulable
+      - expr: |
+          max(pod_namespace_cpu_usage_requests:schedulable) by (node)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_requests:max:schedulable
+      - expr: |
+          max(pod_namespace_cpu_usage_limits:schedulable) by (node)
+        labels:
+          fedscrape: "1m"
+        record: pod_namespace_cpu_usage_limits:max:schedulable
+
+      # scheduler
+      - expr: |
+          label_replace(scheduler_e2e_scheduling_duration_seconds_count, "pod", "$1", "kubernetes_pod_name", "(.*)")  * on (pod) group_left(node) kube_pod_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_e2e_scheduling_duration_seconds_count:node
+      - expr: |
+          label_replace(scheduler_binding_duration_seconds_count, "pod", "$1", "kubernetes_pod_name", "(.*)")  * on (pod) group_left(node) kube_pod_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_binding_duration_seconds_count:node
+      - expr: |
+          label_replace(scheduler_scheduling_algorithm_duration_seconds_count, "pod", "$1", "kubernetes_pod_name", "(.*)")  * on (pod) group_left(node) kube_pod_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_scheduling_algorithm_duration_seconds_count:node
+
+      # etcd
+      - expr: |
+          # hardcoded value, change if reusing rule file elsewhere
+          idelta(etcd_server_slow_apply_total{job="kubernetes-etcd-pods"}[5m])
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_slow_apply_idelta
+      - expr: |
+          # hardcoded value, change if reusing rule file elsewhere
+          delta(etcd_server_slow_apply_total{job="kubernetes-etcd-pods"}[5m])
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_slow_apply_delta:5m
+      - expr: |
+          # hardcoded value, change if reusing rule file elsewhere
+          delta(etcd_server_slow_apply_total{job="kubernetes-etcd-pods"}[60m])
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_slow_apply_delta:60m
+      - expr: |
+          count(etcd_server_id) / sum(etcd_server_has_leader{fedscrape=""})
+        labels:
+          fedscrape: "1m"
+        record: etcd_running_percentage
+
+      # containers
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable) by (container, pod, namespace, workload) / sum(kube_pod_container_resource_requests:running:schedulable{resource="cpu",unit="core"}) by (container, pod, namespace, workload)
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_requests_usage:schedulable
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable) by (container, pod, namespace, workload) / sum(kube_pod_container_resource_limits:running:schedulable{resource="cpu",unit="core"}) by (container, pod, namespace, workload)
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_limits_usage:schedulable
+      - expr: |
+          sum(node_namespace_pod_container:container_memory_working_set_bytes:schedulable{container!=""}) by (container, pod, namespace, workload) / sum(kube_pod_container_resource_requests:running:schedulable{resource="memory",unit="byte"}) by (container, pod, namespace, workload)
+        labels:
+          fedscrape: "1m"
+        record: container_memory_requests_usage:schedulable
+      - expr: |
+          sum(node_namespace_pod_container:container_memory_working_set_bytes:schedulable{container!=""}) by (container, pod, namespace, workload) / sum(kube_pod_container_resource_limits:running:schedulable{resource="memory",unit="byte"}) by (container, pod, namespace, workload)
+        labels:
+          fedscrape: "1m"
+        record: container_memory_limits_usage:schedulable
+
+    - name: kube_pod_running
+      rules:
+      - expr: |
+          kube_pod_container_resource_requests{container!=""} * on (uid)  group_left(instance) kube_pod_status_phase{phase="Running", fedscrape=""}
+        labels:
+          phase: "Running"
+          fedscrape: "1m"
+        record: kube_pod_container_resource_requests:running
+      - expr: |
+          kube_pod_container_resource_requests:running * on (node) group_left() node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_container_resource_requests:running:schedulable
+      - expr: |
+          kube_pod_container_resource_limits{container!=""} * on (uid)  group_left(instance) kube_pod_status_phase{phase="Running", fedscrape=""}
+        labels:
+          phase: "Running"
+          fedscrape: "1m"
+        record: kube_pod_container_resource_limits:running
+      - expr: |
+          kube_pod_container_resource_limits:running * on (node) group_left() node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_container_resource_limits:running:schedulable
+    - name: schedulable_nodes
+      rules:
+      - expr: |
+          node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container!=""} * on (node) group_left() node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable
+      - expr: |
+          container_memory_working_set_bytes{container!="", fedscrape=""} * on (instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_memory_working_set_bytes:schedulable
+      - expr: |
+          node_namespace_pod_container:container_memory_working_set_bytes{container!=""} * on (instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_working_set_bytes:schedulable
+      - expr: |
+          node_namespace_pod:kube_pod_info: * on(node) group_left() node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod:kube_pod_info:schedulable
+      - expr: |
+          node_namespace_pod_container:container_memory_rss{fedscrape=""} * on(node) group_left() node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_rss:schedulable
+      - expr: |
+          node_namespace_pod_container:container_memory_cache * on(node) group_left() node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_cache:schedulable
+      - expr: |
+          node_namespace_pod_container:container_memory_swap{fedscrape=""} * on(node) group_left() node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_swap:schedulable
+      - expr: |
+          container_network_receive_bytes_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_bytes_total:schedulable
+      - expr: |
+          container_network_receive_packets_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_packets_total:schedulable
+      - expr: |
+          container_network_transmit_packets_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_packets_total:schedulable
+      - expr: |
+          container_network_receive_packets_dropped_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_packets_dropped_total:schedulable
+      - expr: |
+          container_network_transmit_packets_dropped_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_packets_dropped_total:schedulable
+      - expr: |
+          container_network_transmit_bytes_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_bytes_total:schedulable
+      - expr: |
+          kube_node_status_allocatable{fedscrape=""} * on(kubernetes_node) group_left() kubernetes_node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: kube_node_status_allocatable:schedulable
+      - expr: |
+          container_cpu_cfs_throttled_periods_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_cfs_throttled_periods_total:schedulable
+      - expr: |
+          container_cpu_cfs_periods_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_cfs_periods_total:schedulable
+      - expr: |
+          kubelet_running_pods{fedscrape=""} * on(instance) group_left() instance_schedulable
+        labels:
+          fedscrape: "1m"
+        record: kubelet_running_pods:schedulable
+      - expr: |
+          kube_pod_container_info{fedscrape=""} * on(kubernetes_node) group_left() kubernetes_node_schedulable
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_container_info:schedulable
+
+    - name: scrape_one_minute
+      interval: 30s
+      rules:
+      - expr: |
+          coredns_dns_request_count_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_request_count_total
+      - expr: |
+          go_memstats_heap_sys_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: go_memstats_heap_sys_bytes
+      - expr: |
+          pilot_conflict_outbound_listener_http_over_current_tcp{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_conflict_outbound_listener_http_over_current_tcp
+      - expr: |
+          kube_node_status_capacity{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_node_status_capacity
+      - expr: |
+          kubeproxy_network_programming_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubeproxy_network_programming_duration_seconds_bucket
+      - expr: |
+          scheduler_binding_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_binding_duration_seconds_bucket
+      - expr: |
+          etcd_network_peer_sent_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_network_peer_sent_bytes_total
+      - expr: |
+          nginx_ingress_controller_config_last_reload_successful{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_config_last_reload_successful
+      - expr: |
+          container_network_receive_packets_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_packets_total
+      - expr: |
+          node_disk_read_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: node_disk_read_bytes_total
+      - expr: |
+          apiserver_request_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: apiserver_request_total
+      - expr: |
+          istio_request_bytes_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_request_bytes_bucket
+      - expr: |
+          workqueue_depth{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: workqueue_depth
+      - expr: |
+          nginx_ingress_controller_request_size_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_request_size_sum
+      - expr: |
+          prometheus_tsdb_head_series{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_tsdb_head_series
+      - expr: |
+          pilot_xds_lds_reject{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds_lds_reject
+      - expr: |
+          istio_requests_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_requests_total
+      - expr: |
+          scheduler_volume_scheduling_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_volume_scheduling_duration_seconds_count
+      - expr: |
+          prometheus_target_scrapes_sample_duplicate_timestamp_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_target_scrapes_sample_duplicate_timestamp_total
+      - expr: |
+          istio_tcp_received_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_tcp_received_bytes_total
+      - expr: |
+          pilot_xds_pushes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds_pushes
+      - expr: |
+          istio_request_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_request_duration_seconds_bucket
+      - expr: |
+          etcd_disk_wal_fsync_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_disk_wal_fsync_duration_seconds_bucket
+      - expr: |
+          cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+      - expr: |
+          kubelet_cgroup_manager_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_cgroup_manager_duration_seconds_count
+      - expr: |
+          process_start_time_seconds{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: process_start_time_seconds
+      - expr: |
+          kube_statefulset_status_replicas_ready{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_statefulset_status_replicas_ready
+      - expr: |
+          etcd_server_proposals_pending{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_proposals_pending
+      - expr: |
+          etcd_mvcc_db_total_size_in_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_mvcc_db_total_size_in_bytes
+      - expr: |
+          nginx_ingress_controller_response_size_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_response_size_bucket
+      - expr: |
+          envoy_server_hot_restart_epoch{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: envoy_server_hot_restart_epoch
+      - expr: |
+          nginx_ingress_controller_requests{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_requests
+      - expr: |
+          etcd_network_client_grpc_sent_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_network_client_grpc_sent_bytes_total
+      - expr: |
+          nginx_ingress_controller_ingress_upstream_latency_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_ingress_upstream_latency_seconds_count
+      - expr: |
+          container_fs_usage_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_fs_usage_bytes
+      - expr: |
+          coredns_dns_request_type_count_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_request_type_count_total
+      - expr: |
+          etcd_server_proposals_failed_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_proposals_failed_total
+      - expr: |
+          pilot_k8s_cfg_events{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_k8s_cfg_events
+      - expr: |
+          rest_client_requests_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: rest_client_requests_total
+      - expr: |
+          kube_deployment_status_replicas{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_deployment_status_replicas
+      - expr: |
+          etcd_server_has_leader{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_has_leader
+      - expr: |
+          go_memstats_heap_alloc_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: go_memstats_heap_alloc_bytes
+      - expr: |
+          process_open_fds{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: process_open_fds
+      - expr: |
+          coredns_dns_request_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_request_duration_seconds_bucket
+      - expr: |
+          kube_deployment_spec_replicas{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_deployment_spec_replicas
+      - expr: |
+          kubelet_running_container_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_running_container_count
+      - expr: |
+          kube_statefulset_replicas{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_statefulset_replicas
+      - expr: |
+          node_filesystem_avail_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: node_filesystem_avail_bytes
+      - expr: |
+          scheduler_volume_scheduling_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_volume_scheduling_duration_seconds_bucket
+      - expr: |
+          kube_secret_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_secret_info
+      - expr: |
+          kubelet_pleg_relist_interval_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_pleg_relist_interval_seconds_bucket
+      - expr: |
+          coredns_dns_request_size_bytes_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_request_size_bytes_bucket
+      - expr: |
+          node_disk_io_time_seconds_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: node_disk_io_time_seconds_total
+      - expr: |
+          node_deployment_without_desired_replicas{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: node_deployment_without_desired_replicas
+      - expr: |
+          istio_request_bytes_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_request_bytes_sum
+      - expr: |
+          istio_build{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_build
+      - expr: |
+          coredns_cache_misses_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_cache_misses_total
+      - expr: |
+          etcd_network_peer_received_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_network_peer_received_bytes_total
+      - expr: |
+          kubelet_running_pods{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_running_pods
+      - expr: |
+          kubelet_pod_worker_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_pod_worker_duration_seconds_count
+      - expr: |
+          kube_statefulset_status_replicas_updated{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_statefulset_status_replicas_updated
+      - expr: |
+          nginx_ingress_controller_response_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_response_duration_seconds_bucket
+      - expr: |
+          nginx_ingress_controller_response_duration_seconds_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_response_duration_seconds_sum
+      - expr: |
+          istio_response_bytes_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_response_bytes_sum
+      - expr: |
+          coredns_cache_hits_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_cache_hits_total
+      - expr: |
+          pilot_proxy_convergence_time_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_proxy_convergence_time_bucket
+      - expr: |
+          nginx_ingress_controller_request_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_request_duration_seconds_bucket
+      - expr: |
+          kubelet_runtime_operations_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_runtime_operations_total
+      - expr: |
+          prometheus_build_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_build_info
+      - expr: |
+          nginx_ingress_controller_nginx_process_connections{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_nginx_process_connections
+      - expr: |
+          nginx_ingress_controller_nginx_process_connections_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_nginx_process_connections_total
+      - expr: |
+          prometheus_target_interval_length_seconds_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_target_interval_length_seconds_sum
+      - expr: |
+          node_namespace_pod_container:container_memory_swap{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_swap
+      - expr: |
+          sidecar_injection_success_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: sidecar_injection_success_total
+      - expr: |
+          container_network_transmit_packets_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_packets_total
+      - expr: |
+          go_memstats_heap_inuse_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: go_memstats_heap_inuse_bytes
+      - expr: |
+          nginx_ingress_controller_request_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_request_duration_seconds_count
+      - expr: |
+          container_cpu_usage_seconds_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_usage_seconds_total
+      - expr: |
+          container_cpu_cfs_throttled_periods_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_cfs_throttled_periods_total
+      - expr: |
+          kubelet_pod_worker_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_pod_worker_duration_seconds_bucket
+      - expr: |
+          nginx_ingress_controller_response_size_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_response_size_count
+      - expr: |
+          kubelet_pleg_relist_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_pleg_relist_duration_seconds_count
+      - expr: |
+          kubeproxy_sync_proxy_rules_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubeproxy_sync_proxy_rules_duration_seconds_count
+      - expr: |
+          nginx_ingress_controller_ssl_expire_time_seconds{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_ssl_expire_time_seconds
+      - expr: |
+          prometheus_target_sync_length_seconds_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_target_sync_length_seconds_sum
+      - expr: |
+          pilot_xds_write_timeout{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds_write_timeout
+      - expr: |
+          envoy_cluster_upstream_cx_rx_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: envoy_cluster_upstream_cx_rx_bytes_total
+      - expr: |
+          pilot_xds_rds_reject{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds_rds_reject
+      - expr: |
+          envoy_cluster_upstream_cx_connect_fail{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: envoy_cluster_upstream_cx_connect_fail
+      - expr: |
+          kubelet_runtime_operations_errors_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_runtime_operations_errors_total
+      - expr: |
+          coredns_cache_entries{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_cache_entries
+      - expr: |
+          storage_operation_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: storage_operation_duration_seconds_count
+      - expr: |
+          coredns_cache_size{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_cache_size
+      - expr: |
+          nginx_ingress_controller_nginx_process_cpu_seconds_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_nginx_process_cpu_seconds_total
+      - expr: |
+          container_network_receive_packets_dropped_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_packets_dropped_total
+      - expr: |
+          workqueue_adds_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: workqueue_adds_total
+      - expr: |
+          nginx_ingress_controller_nginx_process_resident_memory_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_nginx_process_resident_memory_bytes
+      - expr: |
+          envoy_cluster_upstream_cx_tx_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: envoy_cluster_upstream_cx_tx_bytes_total
+      - expr: |
+          kube_pod_status_phase{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_status_phase
+      - expr: |
+          grpc_server_handled_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: grpc_server_handled_total
+      - expr: |
+          kubelet_pod_start_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_pod_start_duration_seconds_count
+      - expr: |
+          kube_statefulset_metadata_generation{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_statefulset_metadata_generation
+      - expr: |
+          process_cpu_seconds_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: process_cpu_seconds_total
+      - expr: |
+          istio_response_bytes_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_response_bytes_bucket
+      - expr: |
+          kubelet_running_pod_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_running_pod_count
+      - expr: |
+          kubeproxy_network_programming_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubeproxy_network_programming_duration_seconds_count
+      - expr: |
+          apiserver_request:availability30d{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: apiserver_request:availability30d
+      - expr: |
+          volume_manager_total_volumes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: volume_manager_total_volumes
+      - expr: |
+          coredns_dns_response_rcode_count_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_response_rcode_count_total
+      - expr: |
+          process_virtual_memory_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: process_virtual_memory_bytes
+      - expr: |
+          etcd_server_proposals_committed_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_proposals_committed_total
+      - expr: |
+          kubelet_running_containers{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_running_containers
+      - expr: |
+          kube_statefulset_status_replicas{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_statefulset_status_replicas
+      - expr: |
+          coredns_dns_do_requests_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_do_requests_total
+      - expr: |
+          istio_tcp_sent_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_tcp_sent_bytes_total
+      - expr: |
+          nginx_ingress_controller_config_last_reload_successful_timestamp_seconds{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_config_last_reload_successful_timestamp_seconds
+      - expr: |
+          kube_pod_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_info
+      - expr: |
+          coredns_dns_responses_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_responses_total
+      - expr: |
+          kube_pod_container_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_container_info
+      - expr: |
+          etcd_server_proposals_applied_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_proposals_applied_total
+      - expr: |
+          kube_statefulset_status_replicas_current{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_statefulset_status_replicas_current
+      - expr: |
+          prometheus_target_scrapes_exceeded_sample_limit_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_target_scrapes_exceeded_sample_limit_total
+      - expr: |
+          storage_operation_errors_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: storage_operation_errors_total
+      - expr: |
+          pilot_conflict_outbound_listener_tcp_over_current_tcp{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_conflict_outbound_listener_tcp_over_current_tcp
+      - expr: |
+          pilot_total_xds_internal_errors{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_total_xds_internal_errors
+      - expr: |
+          kube_configmap_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_configmap_info
+      - expr: |
+          go_goroutines{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: go_goroutines
+      - expr: |
+          kubelet_pleg_relist_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_pleg_relist_duration_seconds_bucket
+      - expr: |
+          kubelet_node_config_error{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_node_config_error
+      - expr: |
+          coredns_dns_requests_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_requests_total
+      - expr: |
+          up{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: up
+      - expr: |
+          kubelet_cgroup_manager_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_cgroup_manager_duration_seconds_bucket
+      - expr: |
+          go_memstats_alloc_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: go_memstats_alloc_bytes
+      - expr: |
+          prometheus_sd_discovered_targets{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_sd_discovered_targets
+      - expr: |
+          container_network_receive_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_bytes_total
+      - expr: |
+          pilot_total_xds_rejects{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_total_xds_rejects
+      - expr: |
+          galley_validation_passed{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: galley_validation_passed
+      - expr: |
+          prometheus_target_scrapes_sample_out_of_order_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_target_scrapes_sample_out_of_order_total
+      - expr: |
+          nginx_ingress_controller_success{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_success
+      - expr: |
+          etcd_network_client_grpc_received_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_network_client_grpc_received_bytes_total
+      - expr: |
+          go_memstats_stack_inuse_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: go_memstats_stack_inuse_bytes
+      - expr: |
+          pilot_conflict_outbound_listener_tcp_over_current_http{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_conflict_outbound_listener_tcp_over_current_http
+      - expr: |
+          container_cpu_cfs_periods_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_cfs_periods_total
+      - expr: |
+          pilot_conflict_inbound_listener{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_conflict_inbound_listener
+      - expr: |
+          envoy_cluster_upstream_cx_active{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: envoy_cluster_upstream_cx_active
+      - expr: |
+          prometheus_target_interval_length_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_target_interval_length_seconds_count
+      - expr: |
+          prometheus_engine_query_duration_seconds_count{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_engine_query_duration_seconds_count
+      - expr: |
+          coredns_dns_response_size_bytes_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_response_size_bytes_bucket
+      - expr: |
+          envoy_cluster_upstream_cx_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: envoy_cluster_upstream_cx_total
+      - expr: |
+          scheduler_e2e_scheduling_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_e2e_scheduling_duration_seconds_bucket
+      - expr: |
+          container_memory_working_set_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_memory_working_set_bytes
+      - expr: |
+          pilot_xds_push_context_errors{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds_push_context_errors
+      - expr: |
+          istio_request_duration_milliseconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: istio_request_duration_milliseconds_bucket
+      - expr: |
+          prometheus_engine_query_duration_seconds{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_engine_query_duration_seconds
+      - expr: |
+          rest_client_request_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: rest_client_request_duration_seconds_bucket
+      - expr: |
+          storage_operation_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: storage_operation_duration_seconds_bucket
+      - expr: |
+          container_network_transmit_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_bytes_total
+      - expr: |
+          container_memory_usage_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_memory_usage_bytes
+      - expr: |
+          kube_statefulset_status_observed_generation{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_statefulset_status_observed_generation
+      - expr: |
+          prometheus_tsdb_head_chunks{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_tsdb_head_chunks
+      - expr: |
+          nginx_ingress_controller_response_size_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_response_size_sum
+      - expr: |
+          etcd_disk_backend_commit_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_disk_backend_commit_duration_seconds_bucket
+      - expr: |
+          prometheus_target_scrapes_sample_out_of_bounds_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_target_scrapes_sample_out_of_bounds_total
+      - expr: |
+          pilot_services{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_services
+      - expr: |
+          prometheus_tsdb_head_samples_appended_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: prometheus_tsdb_head_samples_appended_total
+      - expr: |
+          container_network_transmit_packets_dropped_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_packets_dropped_total
+      - expr: |
+          galley_validation_failed{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: galley_validation_failed
+      - expr: |
+          kubeproxy_sync_proxy_rules_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubeproxy_sync_proxy_rules_duration_seconds_bucket
+      - expr: |
+          workqueue_queue_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: workqueue_queue_duration_seconds_bucket
+      - expr: |
+          scheduler_scheduling_algorithm_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: scheduler_scheduling_algorithm_duration_seconds_bucket
+      - expr: |
+          pilot_virt_services{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_virt_services
+      - expr: |
+          process_resident_memory_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: process_resident_memory_bytes
+      - expr: |
+          coredns_dns_request_do_count_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: coredns_dns_request_do_count_total
+      - expr: |
+          kube_service_info{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_service_info
+      - expr: |
+          node_filesystem_size_bytes{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: node_filesystem_size_bytes
+      - expr: |
+          pilot_xds{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds
+      - expr: |
+          kube_node_status_allocatable{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_node_status_allocatable
+      - expr: |
+          node_disk_written_bytes_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: node_disk_written_bytes_total
+      - expr: |
+          sidecar_injection_failure_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: sidecar_injection_failure_total
+      - expr: |
+          grpc_server_started_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: grpc_server_started_total
+      - expr: |
+          nginx_ingress_controller_ingress_upstream_latency_seconds_sum{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: nginx_ingress_controller_ingress_upstream_latency_seconds_sum
+      - expr: |
+          pilot_xds_eds_reject{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds_eds_reject
+      - expr: |
+          kubelet_runtime_operations_duration_seconds_bucket{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kubelet_runtime_operations_duration_seconds_bucket
+      - expr: |
+          etcd_server_leader_changes_seen_total{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: etcd_server_leader_changes_seen_total
+      - expr: |
+          pilot_xds_cds_reject{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: pilot_xds_cds_reject
+          
+    - name: workload_metrics
+      rules:
+      - expr: |
+          kube_pod_container_resource_requests:running:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_container_resource_requests:running:workload:schedulable
+      - expr: |
+          kube_pod_container_resource_limits:running:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_container_resource_limits:running:workload:schedulable
+      - expr: |
+          node_namespace_pod:kube_pod_info:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod:kube_pod_info:workload:schedulable
+      - expr: |
+          node_namespace_pod_container:container_memory_working_set_bytes:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_working_set_bytes:workload:schedulable
+      - expr: |
+          node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:workload:schedulable
+      - expr: |
+          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:workload:schedulable{container!=""}) by (workload)
+        labels:
+          unit: "core"
+          fedscrape: "1m"
+        record: workload_cpu_usage:schedulable
+      - expr: |
+          workload_cpu_usage:schedulable{unit="core"} / ignoring(workload) group_left(unit) cluster_cpu_total:schedulable
+        labels:
+          unit: "percentage"
+          fedscrape: "1m"
+        record: workload_cpu_usage:schedulable
+      - expr: |
+          sum(node_namespace_pod_container:container_memory_working_set_bytes:workload:schedulable) by (workload)
+        labels:
+          unit: "byte"
+          fedscrape: "1m"
+        record: workload_memory_usage:schedulable
+      - expr: |
+          workload_memory_usage:schedulable{unit="byte"} / ignoring(workload) group_left(unit) cluster_memory_total:schedulable
+        labels:
+          unit: "percentage"
+          fedscrape: "1m"
+        record: workload_memory_usage:schedulable
+      - expr: |
+          container_cpu_cfs_throttled_periods_total{fedscrape=""} * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_cfs_throttled_periods_total:workload
+      - expr: |
+          container_cpu_cfs_periods_total{fedscrape=""} * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_cpu_cfs_periods_total:workload
+      - expr: |
+          node_namespace_pod_container:container_memory_rss:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_rss:workload:schedulable
+      - expr: |
+          node_namespace_pod_container:container_memory_cache:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_cache:workload:schedulable
+      - expr: |
+          node_namespace_pod_container:container_memory_swap:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_swap:workload:schedulable
+      - expr: |
+          container_network_receive_bytes_total:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_bytes_total:workload:schedulable
+      - expr: |
+          container_network_receive_bytes_total:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_bytes_total:workload:schedulable
+      - expr: |
+          container_network_receive_packets_total:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_packets_total:workload:schedulable
+      - expr: |
+          container_network_transmit_packets_total:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_packets_total:workload:schedulable
+      - expr: |
+          container_network_receive_packets_dropped_total:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_network_receive_packets_dropped_total:workload:schedulable
+      - expr: |
+          container_network_transmit_packets_dropped_total:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_packets_dropped_total:workload:schedulable
+      - expr: |
+          container_network_transmit_bytes_total:schedulable * on(pod) group_left(workload) namespace_workload_pod:kube_pod_owner:relabel
+        labels:
+          fedscrape: "1m"
+        record: container_network_transmit_bytes_total:workload:schedulable
+    - name: kube-apiserver-burnrate.rules
+      rules:
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"LIST|GET"}[1d]))
+              -
+              (
+                (
+                  sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope=~"resource|",le="1"}[1d]))
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="namespace",le="5"}[1d]))
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="cluster",le="40"}[1d]))
+              )
+            )
+            +
+            # errors
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",code=~"5..",fedscrape=""}[1d]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[1d]))
+        labels:
+          verb: read
+        record: apiserver_request:burnrate1d
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"LIST|GET"}[1h]))
+              -
+              (
+                (
+                  sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope=~"resource|",le="1"}[1h]))
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="namespace",le="5"}[1h]))
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="cluster",le="40"}[1h]))
+              )
+            )
+            +
+            # errors
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",code=~"5..",fedscrape=""}[1h]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[1h]))
+        labels:
+          verb: read
+        record: apiserver_request:burnrate1h
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"LIST|GET"}[2h]))
+              -
+              (
+                (
+                  sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope=~"resource|",le="1"}[2h]))
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="namespace",le="5"}[2h]))
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="cluster",le="40"}[2h]))
+              )
+            )
+            +
+            # errors
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",code=~"5..",fedscrape=""}[2h]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[2h]))
+        labels:
+          verb: read
+        record: apiserver_request:burnrate2h
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"LIST|GET"}[30m]))
+              -
+              (
+                (
+                  sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope=~"resource|",le="1"}[30m]))
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="namespace",le="5"}[30m]))
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="cluster",le="40"}[30m]))
+              )
+            )
+            +
+            # errors
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",code=~"5..",fedscrape=""}[30m]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[30m]))
+        labels:
+          verb: read
+        record: apiserver_request:burnrate30m
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"LIST|GET"}[3d]))
+              -
+              (
+                (
+                  sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope=~"resource|",le="1"}[3d]))
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="namespace",le="5"}[3d]))
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="cluster",le="40"}[3d]))
+              )
+            )
+            +
+            # errors
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",code=~"5..",fedscrape=""}[3d]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[3d]))
+        labels:
+          verb: read
+        record: apiserver_request:burnrate3d
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"LIST|GET"}[5m]))
+              -
+              (
+                (
+                  sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope=~"resource|",le="1"}[5m]))
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="namespace",le="5"}[5m]))
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="cluster",le="40"}[5m]))
+              )
+            )
+            +
+            # errors
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",code=~"5..",fedscrape=""}[5m]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[5m]))
+        labels:
+          verb: read
+        record: apiserver_request:burnrate5m
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"LIST|GET"}[6h]))
+              -
+              (
+                (
+                  sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope=~"resource|",le="1"}[6h]))
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="namespace",le="5"}[6h]))
+                +
+                sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET",scope="cluster",le="40"}[6h]))
+              )
+            )
+            +
+            # errors
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",code=~"5..",fedscrape=""}[6h]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[6h]))
+        labels:
+          verb: read
+        record: apiserver_request:burnrate6h
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[1d]))
+              -
+              sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",le="1"}[1d]))
+            )
+            +
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[1d]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[1d]))
+        labels:
+          verb: write
+        record: apiserver_request:burnrate1d
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[1h]))
+              -
+              sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",le="1"}[1h]))
+            )
+            +
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[1h]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[1h]))
+        labels:
+          verb: write
+        record: apiserver_request:burnrate1h
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[2h]))
+              -
+              sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",le="1"}[2h]))
+            )
+            +
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[2h]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[2h]))
+        labels:
+          verb: write
+        record: apiserver_request:burnrate2h
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[30m]))
+              -
+              sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",le="1"}[30m]))
+            )
+            +
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[30m]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[30m]))
+        labels:
+          verb: write
+        record: apiserver_request:burnrate30m
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[3d]))
+              -
+              sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",le="1"}[3d]))
+            )
+            +
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[3d]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[3d]))
+        labels:
+          verb: write
+        record: apiserver_request:burnrate3d
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[5m]))
+              -
+              sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",le="1"}[5m]))
+            )
+            +
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[5m]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[5m]))
+        labels:
+          verb: write
+        record: apiserver_request:burnrate5m
+      - expr: |
+          (
+            (
+              # too slow
+              sum by (cluster) (rate(apiserver_request_duration_seconds_count{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[6h]))
+              -
+              sum by (cluster) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",le="1"}[6h]))
+            )
+            +
+            sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[6h]))
+          )
+          /
+          sum by (cluster) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[6h]))
+        labels:
+          verb: write
+        record: apiserver_request:burnrate6h
+    - name: kube-apiserver-histogram.rules
+      rules:
+      - expr: |
+          histogram_quantile(0.99, sum by (cluster, le, resource) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"LIST|GET"}[5m]))) > 0
+        labels:
+          quantile: "0.99"
+          verb: read
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.99, sum by (cluster, le, resource) (rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE"}[5m]))) > 0
+        labels:
+          quantile: "0.99"
+          verb: write
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.99, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",subresource!="log",verb!~"LIST|WATCH|WATCHLIST|DELETECOLLECTION|PROXY|CONNECT"}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.99"
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.9, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",subresource!="log",verb!~"LIST|WATCH|WATCHLIST|DELETECOLLECTION|PROXY|CONNECT"}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.9"
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.5, sum(rate(apiserver_request_duration_seconds_bucket{job="kubernetes-apiservers",subresource!="log",verb!~"LIST|WATCH|WATCHLIST|DELETECOLLECTION|PROXY|CONNECT"}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.5"
+        record: cluster_quantile:apiserver_request_duration_seconds:histogram_quantile
+    - interval: 3m
+      name: kube-apiserver-availability.rules
+      rules:
+      - expr: |
+          avg_over_time(code_verb:apiserver_request_total:increase1h[30d]) * 24 * 30
+        record: code_verb:apiserver_request_total:increase30d
+      - expr: |
+          sum by (cluster, code) (code_verb:apiserver_request_total:increase30d{verb=~"LIST|GET"})
+        labels:
+          verb: read
+        record: code:apiserver_request_total:increase30d
+      - expr: |
+          sum by (cluster, code) (code_verb:apiserver_request_total:increase30d{verb=~"POST|PUT|PATCH|DELETE"})
+        labels:
+          verb: write
+        record: code:apiserver_request_total:increase30d
+      - expr: |
+          sum by (cluster, verb, scope) (increase(apiserver_request_duration_seconds_count[1h]))
+        record: cluster_verb_scope:apiserver_request_duration_seconds_count:increase1h
+      - expr: |
+          sum by (cluster, verb, scope) (avg_over_time(cluster_verb_scope:apiserver_request_duration_seconds_count:increase1h[30d]) * 24 * 30)
+        record: cluster_verb_scope:apiserver_request_duration_seconds_count:increase30d
+      - expr: |
+          sum by (cluster, verb, scope, le) (increase(apiserver_request_duration_seconds_bucket[1h]))
+        record: cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase1h
+      - expr: |
+          sum by (cluster, verb, scope, le) (avg_over_time(cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase1h[30d]) * 24 * 30)
+        record: cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d
+      - expr: |
+          1 - (
+            (
+              # write too slow
+              sum by (cluster) (cluster_verb_scope:apiserver_request_duration_seconds_count:increase30d{verb=~"POST|PUT|PATCH|DELETE"})
+              -
+              sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"POST|PUT|PATCH|DELETE",le="1"})
+            ) +
+            (
+              # read too slow
+              sum by (cluster) (cluster_verb_scope:apiserver_request_duration_seconds_count:increase30d{verb=~"LIST|GET"})
+              -
+              (
+                (
+                  sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"LIST|GET",scope=~"resource|",le="1"})
+                  or
+                  vector(0)
+                )
+                +
+                sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"LIST|GET",scope="namespace",le="5"})
+                +
+                sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"LIST|GET",scope="cluster",le="40"})
+              )
+            ) +
+            # errors
+            sum by (cluster) (code:apiserver_request_total:increase30d{code=~"5.."} or vector(0))
+          )
+          /
+          sum by (cluster) (code:apiserver_request_total:increase30d)
+        labels:
+          verb: all
+        record: apiserver_request:availability30d
+      - expr: |
+          1 - (
+            sum by (cluster) (cluster_verb_scope:apiserver_request_duration_seconds_count:increase30d{verb=~"LIST|GET"})
+            -
+            (
+              # too slow
+              (
+                sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"LIST|GET",scope=~"resource|",le="1"})
+                or
+                vector(0)
+              )
+              +
+              sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"LIST|GET",scope="namespace",le="5"})
+              +
+              sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"LIST|GET",scope="cluster",le="40"})
+            )
+            +
+            # errors
+            sum by (cluster) (code:apiserver_request_total:increase30d{verb="read",code=~"5.."} or vector(0))
+          )
+          /
+          sum by (cluster) (code:apiserver_request_total:increase30d{verb="read"})
+        labels:
+          verb: read
+        record: apiserver_request:availability30d
+      - expr: |
+          1 - (
+            (
+              # too slow
+              sum by (cluster) (cluster_verb_scope:apiserver_request_duration_seconds_count:increase30d{verb=~"POST|PUT|PATCH|DELETE"})
+              -
+              sum by (cluster) (cluster_verb_scope_le:apiserver_request_duration_seconds_bucket:increase30d{verb=~"POST|PUT|PATCH|DELETE",le="1"})
+            )
+            +
+            # errors
+            sum by (cluster) (code:apiserver_request_total:increase30d{verb="write",code=~"5.."} or vector(0))
+          )
+          /
+          sum by (cluster) (code:apiserver_request_total:increase30d{verb="write"})
+        labels:
+          verb: write
+        record: apiserver_request:availability30d
+      - expr: |
+          sum by (cluster,code,resource) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET",fedscrape=""}[5m]))
+        labels:
+          verb: read
+          fedscrape: "1m"
+        record: code_resource:apiserver_request_total:rate5m
+      - expr: |
+          sum by (cluster,code,resource) (rate(apiserver_request_total{job="kubernetes-apiservers",verb=~"POST|PUT|PATCH|DELETE",fedscrape=""}[5m]))
+        labels:
+          verb: write
+          fedscrape: "1m"
+        record: code_resource:apiserver_request_total:rate5m
+      - expr: |
+          sum by (cluster, code, verb) (increase(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET|POST|PUT|PATCH|DELETE",code=~"2..",fedscrape=""}[1h]))
+        record: code_verb:apiserver_request_total:increase1h
+      - expr: |
+          sum by (cluster, code, verb) (increase(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET|POST|PUT|PATCH|DELETE",code=~"3..",fedscrape=""}[1h]))
+        record: code_verb:apiserver_request_total:increase1h
+      - expr: |
+          sum by (cluster, code, verb) (increase(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET|POST|PUT|PATCH|DELETE",code=~"4..",fedscrape=""}[1h]))
+        record: code_verb:apiserver_request_total:increase1h
+      - expr: |
+          sum by (cluster, code, verb) (increase(apiserver_request_total{job="kubernetes-apiservers",verb=~"LIST|GET|POST|PUT|PATCH|DELETE",code=~"5..",fedscrape=""}[1h]))
+        record: code_verb:apiserver_request_total:increase1h
+    - name: k8s.rules
+      rules:
+      - expr: |
+          sum by (cluster, namespace, pod, container) (
+            irate(container_cpu_usage_seconds_total{job="kubernetes-nodes-cadvisor", image!="", fedscrape=""}[5m])
+          ) * on (cluster, namespace, pod) group_left(node) topk by (cluster, namespace, pod) (
+            1, max by(cluster, namespace, pod, node) (kube_pod_info{node!="", fedscrape=""})
+          )
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
+      - expr: |
+          container_memory_working_set_bytes{job="kubernetes-nodes-cadvisor", image!="", fedscrape=""}
+          * on (namespace, pod) group_left(node) topk by(namespace, pod) (1,
+            max by(namespace, pod, node) (kube_pod_info{node!="", fedscrape=""})
+          )
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_working_set_bytes
+      - expr: |
+          container_memory_rss{job="kubernetes-nodes-cadvisor", image!=""}
+          * on (namespace, pod) group_left(node) topk by(namespace, pod) (1,
+            max by(namespace, pod, node) (kube_pod_info{node!="", fedscrape=""})
+          )
+        record: node_namespace_pod_container:container_memory_rss
+      - expr: |
+          container_memory_cache{job="kubernetes-nodes-cadvisor", image!=""}
+          * on (namespace, pod) group_left(node) topk by(namespace, pod) (1,
+            max by(namespace, pod, node) (kube_pod_info{node!="", fedscrape=""})
+          )
+        labels:
+          fedscrape: "1m"
+        record: node_namespace_pod_container:container_memory_cache
+      - expr: |
+          container_memory_swap{job="kubernetes-nodes-cadvisor", image!=""}
+          * on (namespace, pod) group_left(node) topk by(namespace, pod) (1,
+            max by(namespace, pod, node) (kube_pod_info{node!="", fedscrape=""})
+          )
+        record: node_namespace_pod_container:container_memory_swap
+      - expr: |
+          kube_pod_container_resource_requests{resource="memory",job="kubernetes-service-endpoints"}  * on (namespace, pod, cluster)
+          group_left() max by (namespace, pod) (
+            (kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1)
+          )
+        record: cluster:namespace:pod_memory:active:kube_pod_container_resource_requests
+      - expr: |
+          sum by (namespace, cluster) (
+              sum by (namespace, pod, cluster) (
+                  max by (namespace, pod, container, cluster) (
+                    kube_pod_container_resource_requests{resource="memory",job="kubernetes-service-endpoints"}
+                  ) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (
+                    kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1
+                  )
+              )
+          )
+        record: namespace_memory:kube_pod_container_resource_requests:sum
+      - expr: |
+          kube_pod_container_resource_requests{resource="cpu",job="kubernetes-service-endpoints"}  * on (namespace, pod, cluster)
+          group_left() max by (namespace, pod) (
+            (kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1)
+          )
+        record: cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests
+      - expr: |
+          sum by (namespace, cluster) (
+              sum by (namespace, pod, cluster) (
+                  max by (namespace, pod, container, cluster) (
+                    kube_pod_container_resource_requests{resource="cpu",job="kubernetes-service-endpoints"}
+                  ) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (
+                    kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1
+                  )
+              )
+          )
+        record: namespace_cpu:kube_pod_container_resource_requests:sum
+      - expr: |
+          kube_pod_container_resource_limits{resource="memory",job="kubernetes-service-endpoints"}  * on (namespace, pod, cluster)
+          group_left() max by (namespace, pod) (
+            (kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1)
+          )
+        record: cluster:namespace:pod_memory:active:kube_pod_container_resource_limits
+      - expr: |
+          sum by (namespace, cluster) (
+              sum by (namespace, pod, cluster) (
+                  max by (namespace, pod, container, cluster) (
+                    kube_pod_container_resource_limits{resource="memory",job="kubernetes-service-endpoints"}
+                  ) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (
+                    kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1
+                  )
+              )
+          )
+        record: namespace_memory:kube_pod_container_resource_limits:sum
+      - expr: |
+          kube_pod_container_resource_limits{resource="cpu",job="kubernetes-service-endpoints"}  * on (namespace, pod, cluster)
+          group_left() max by (namespace, pod) (
+           (kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1)
+           )
+        record: cluster:namespace:pod_cpu:active:kube_pod_container_resource_limits
+      - expr: |
+          sum by (namespace, cluster) (
+              sum by (namespace, pod, cluster) (
+                  max by (namespace, pod, container, cluster) (
+                    kube_pod_container_resource_limits{resource="cpu",job="kubernetes-service-endpoints"}
+                  ) * on(namespace, pod, cluster) group_left() max by (namespace, pod, cluster) (
+                    kube_pod_status_phase{phase=~"Pending|Running", fedscrape=""} == 1
+                  )
+              )
+          )
+        record: namespace_cpu:kube_pod_container_resource_limits:sum
+      - expr: |
+          max by (cluster, namespace, workload, pod) (
+            label_replace(
+              label_replace(
+                kube_pod_owner{job="kubernetes-service-endpoints", owner_kind="ReplicaSet"},
+                "replicaset", "$1", "owner_name", "(.*)"
+              ) * on(replicaset, namespace) group_left(owner_name) topk by(replicaset, namespace) (
+                1, max by (replicaset, namespace, owner_name) (
+                  kube_replicaset_owner{job="kubernetes-service-endpoints"}
+                )
+              ),
+              "workload", "$1", "owner_name", "(.*)"
+            )
+          )
+        labels:
+          workload_type: deployment
+          fedscrape: "1m"
+        record: namespace_workload_pod:kube_pod_owner:relabel
+      - expr: |
+          max by (cluster, namespace, workload, pod) (
+            label_replace(
+              kube_pod_owner{job="kubernetes-service-endpoints", owner_kind="DaemonSet"},
+              "workload", "$1", "owner_name", "(.*)"
+            )
+          )
+        labels:
+          workload_type: daemonset
+          fedscrape: "1m"
+        record: namespace_workload_pod:kube_pod_owner:relabel
+      - expr: |
+          max by (cluster, namespace, workload, pod) (
+            label_replace(
+              kube_pod_owner{job="kubernetes-service-endpoints", owner_kind="StatefulSet"},
+              "workload", "$1", "owner_name", "(.*)"
+            )
+          )
+        labels:
+          workload_type: statefulset
+          fedscrape: "1m"
+        record: namespace_workload_pod:kube_pod_owner:relabel
+    - name: kube-scheduler.rules
+      rules:
+      - expr: |
+          histogram_quantile(0.99, sum(rate(scheduler_e2e_scheduling_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.99"
+        record: cluster_quantile:scheduler_e2e_scheduling_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.99, sum(rate(scheduler_scheduling_algorithm_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.99"
+        record: cluster_quantile:scheduler_scheduling_algorithm_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.99, sum(rate(scheduler_binding_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.99"
+        record: cluster_quantile:scheduler_binding_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.9, sum(rate(scheduler_e2e_scheduling_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.9"
+        record: cluster_quantile:scheduler_e2e_scheduling_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.9, sum(rate(scheduler_scheduling_algorithm_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.9"
+        record: cluster_quantile:scheduler_scheduling_algorithm_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.9, sum(rate(scheduler_binding_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.9"
+        record: cluster_quantile:scheduler_binding_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.5, sum(rate(scheduler_e2e_scheduling_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.5"
+        record: cluster_quantile:scheduler_e2e_scheduling_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.5, sum(rate(scheduler_scheduling_algorithm_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.5"
+        record: cluster_quantile:scheduler_scheduling_algorithm_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.5, sum(rate(scheduler_binding_duration_seconds_bucket{job="kube-scheduler", fedscrape=""}[5m])) without(instance, pod))
+        labels:
+          quantile: "0.5"
+        record: cluster_quantile:scheduler_binding_duration_seconds:histogram_quantile
+    - name: node.rules
+      rules:
+      - expr: |
+          topk by(namespace, pod) (1,
+            max by (node, namespace, pod) (
+              label_replace(kube_pod_info{job="kubernetes-service-endpoints",node!="", fedscrape=""}, "pod", "$1", "pod", "(.*)")
+          ))
+        record: 'node_namespace_pod:kube_pod_info:'
+      - expr: |
+          count by (cluster, node) (sum by (node, cpu) (
+            node_cpu_seconds_total{job="node-exporter"}
+          * on (namespace, pod) group_left(node)
+            topk by(namespace, pod) (1, node_namespace_pod:kube_pod_info:)
+          ))
+        record: node:node_num_cpu:sum
+      - expr: |
+          sum(
+            node_memory_MemAvailable_bytes{job="node-exporter"} or
+            (
+              node_memory_Buffers_bytes{job="node-exporter"} +
+              node_memory_Cached_bytes{job="node-exporter"} +
+              node_memory_MemFree_bytes{job="node-exporter"} +
+              node_memory_Slab_bytes{job="node-exporter"}
+            )
+          ) by (cluster)
+        record: :node_memory_MemAvailable_bytes:sum
+    - name: kubelet.rules
+      rules:
+      - expr: |
+          histogram_quantile(0.99, sum(rate(kubelet_pleg_relist_duration_seconds_bucket{fedscrape=""}[5m])) by (instance, le) * on(instance) group_left(node) kubelet_node_name{job="kubelet", metrics_path="/metrics"})
+        labels:
+          quantile: "0.99"
+        record: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.9, sum(rate(kubelet_pleg_relist_duration_seconds_bucket{fedscrape=""}[5m])) by (instance, le) * on(instance) group_left(node) kubelet_node_name{job="kubelet", metrics_path="/metrics"})
+        labels:
+          quantile: "0.9"
+        record: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile
+      - expr: |
+          histogram_quantile(0.5, sum(rate(kubelet_pleg_relist_duration_seconds_bucket{fedscrape=""}[5m])) by (instance, le) * on(instance) group_left(node) kubelet_node_name{job="kubelet", metrics_path="/metrics"})
+        labels:
+          quantile: "0.5"
+        record: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile

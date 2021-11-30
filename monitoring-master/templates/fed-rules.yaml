@@ -1,0 +1,25 @@
+# edited from grafana helm chart
+{{- if .Values.prometheus_rules }}
+{{ $files := .Files }}
+{{- range $rule, $value := .Values.prometheus_rules }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ceritsc-master-prometheus-rules-{{ $rule }}
+  namespace: {{ $.Release.Namespace }}
+  {{- if hasKey $value "label" }}
+  {{- if $value.label }}
+  labels:
+    {{ print $value.label }}: "1"
+  {{- end }}
+  {{- end }}
+data:
+{{ print $rule | indent 2 }}.yml:
+{{- if hasKey $value "file" }}
+{{ toYaml ( $files.Get $value.file ) | indent 4}}
+{{- end }}
+---
+{{- end }}
+
+{{- end }}
+

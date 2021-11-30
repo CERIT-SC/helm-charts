@@ -1,0 +1,164 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": false,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 54,
+  "iteration": 1638263895985,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Loki",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "pluginVersion": "8.0.3",
+      "targets": [
+        {
+          "expr": "{source=\"promtail\",cluster=~\"$cluster\",container=\"kube-apiserver\"} |= \"delete\" |= \"authorization.k8s.io/reason\" != \"to ServiceAccount\" !~ \"to User.*system:kube\" | json | annotations_authorization_k8s_io_reason != \"\" | annotations_authorization_k8s_io_decision = \"allow\" | objectRef_name != \"\" | line_format \"❌ {{TrimRight .objectRef_resource \\\"s\\\"}} {{.objectRef_name}} DELETED due to authorization from {{.impersonatedUser_username}}\"",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{objectRef_name}} - {{annotations_authorization_k8s_io_reason}}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "expr": "{source=\"promtail\",cluster=~\"$cluster\",container=\"kube-apiserver\"} |= \"create\" |= \"authorization.k8s.io/reason\" != \"to ServiceAccount\" !~ \"to User.*system:kube\" | json | annotations_authorization_k8s_io_reason != \"\" | annotations_authorization_k8s_io_decision = \"allow\" | objectRef_name != \"\" | line_format \"✅ {{TrimRight .objectRef_resource \\\"s\\\"}} {{.objectRef_name}} CREATED due to authorization from {{.impersonatedUser_username}}\"",
+          "hide": false,
+          "refId": "B"
+        }
+      ],
+      "title": "Kubernetes operations (excluding service accounts)",
+      "transformations": [
+        {
+          "id": "seriesToRows",
+          "options": {}
+        }
+      ],
+      "type": "logs"
+    },
+    {
+      "datasource": "Loki",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "expr": "{job=\"systemd-journal\", cluster=~\"$cluster\"} |= \"segfault\" | regexp \"(?P<program>\\\\w+)\\\\[(?P<pid>[0-9]+)\\\\].*\" | line_format \"⚠️ Program \\\"{{.program}}\\\" with PID {{.pid}} has ended due to SEGFAULT\"",
+          "refId": "A"
+        }
+      ],
+      "title": "Segfaulting programs",
+      "type": "logs"
+    },
+    {
+      "datasource": "Loki",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "expr": "{source=\"promtail\", job=\"systemd-journal\", cluster=~\"$cluster\"} |= \"oom-kill:\" | regexp \".*kubepods.burstable.(?P<pod>.+),task_.*task=(?P<task>.+),pid=(?P<pid>[0-9]+).*\" | line_format \"☠️ Process \\\"{{.task}}\\\" with PID {{.pid}} in pod \\\"{{.pod}}\\\" was killed by oom-kill\"",
+          "refId": "A"
+        }
+      ],
+      "title": "OOM processes",
+      "type": "logs"
+    }
+  ],
+  "schemaVersion": 30,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": [
+            "hdha"
+          ],
+          "value": [
+            "hdha"
+          ]
+        },
+        "datasource": null,
+        "definition": "label_values(cluster)",
+        "description": "cluster",
+        "error": null,
+        "hide": 0,
+        "includeAll": true,
+        "label": "cluster",
+        "multi": true,
+        "name": "cluster",
+        "options": [],
+        "query": {
+          "query": "label_values(cluster)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-3h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Log info",
+  "uid": "c-AXPfd7z",
+  "version": 18
+}
