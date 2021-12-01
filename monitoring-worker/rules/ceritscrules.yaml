@@ -76,7 +76,7 @@ groups:
 
       # cluster crashloopbackoff count
       - expr: |
-          count(kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"})
+          count(kube_pod_container_status_waiting_reason{reason="CrashLoopBackOff"}) or vector(0)
         labels:
           fedscrape: "1m"
         record: cluster_crashloopbackoff:count
