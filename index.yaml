@@ -3,7 +3,7 @@ entries:
   monitoring-master:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-12-03T14:45:55.398136242+01:00"
+    created: "2021-12-08T09:06:45.815542407+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -23,7 +23,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-12-03T14:45:55.387692444+01:00"
+    created: "2021-12-08T09:06:45.805355834+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -44,7 +44,24 @@ entries:
   monitoring-worker:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-12-03T14:45:55.419837037+01:00"
+    created: "2021-12-08T09:06:45.845003161+01:00"
+    dependencies:
+    - name: promtail
+      repository: https://grafana.github.io/helm-charts
+      version: 3.8.1
+    - name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 14.8.1
+    description: A Helm chart for Kubernetes
+    digest: 6a7f457b7f5b468cd34bad973348466c6662b04f4e337c1025390391a3d60562
+    name: monitoring-worker
+    type: application
+    urls:
+    - monitoring-worker-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2021-12-08T09:06:45.83761524+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -61,7 +78,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-12-03T14:45:55.412557402+01:00"
+    created: "2021-12-08T09:06:45.830189661+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -78,7 +95,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2021-12-03T14:45:55.405073431+01:00"
+    created: "2021-12-08T09:06:45.823279575+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -93,4 +110,4 @@ entries:
     urls:
     - monitoring-worker-0.1.2.tgz
     version: 0.1.2
-generated: "2021-12-03T14:45:55.377416733+01:00"
+generated: "2021-12-08T09:06:45.794520907+01:00"
