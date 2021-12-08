@@ -1,5 +1,5 @@
 groups:
-    - name: my_custom
+    - name: cerit_rules
       rules:
       # is node schedulable ?
       - expr: |
@@ -32,7 +32,7 @@ groups:
           dashes: "false"
         record: node_container_cpu_limits_usage:above:90:pods
       - expr: |
-          node_schedulable * on(node) group_right() node_container_cpu_limits_usage:above:90:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+          (node_schedulable > 0) * on(node) group_right() node_container_cpu_limits_usage:above:90:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
         labels:
           fedscrape: "1m"
           dashes: "true"
@@ -44,7 +44,7 @@ groups:
           dashes: "false"
         record: node_container_cpu_requests_usage:above:100:pods
       - expr: |
-          node_schedulable * on(node) group_right() node_container_cpu_requests_usage:above:100:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+          (node_schedulable > 0) * on(node) group_right() node_container_cpu_requests_usage:above:100:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
         labels:
           fedscrape: "1m"
           dashes: "true"
@@ -56,7 +56,7 @@ groups:
           dashes: "false"
         record: node_container_memory_limits_usage:above:90:pods
       - expr: |
-          node_schedulable * on(node) group_right() node_container_memory_limits_usage:above:90:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+          (node_schedulable > 0) * on(node) group_right() node_container_memory_limits_usage:above:90:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
         labels:
           fedscrape: "1m"
           dashes: "true"
@@ -68,7 +68,7 @@ groups:
           dashes: "false"
         record: node_container_memory_requests_usage:above:100:pods
       - expr: |
-          node_schedulable * on(node) group_right() node_container_memory_requests_usage:above:100:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
+          (node_schedulable > 0) * on(node) group_right() node_container_memory_requests_usage:above:100:pods{dashes="false"} > 0 or on (node) ((label_replace(node_schedulable, "pod", "-", "", "") == 1) * 0)
         labels:
           fedscrape: "1m"
           dashes: "true"
@@ -103,25 +103,25 @@ groups:
         record: cluster_daemonset_without_desired_replicas:count
       # cluster cpu
       - expr: |
-          sum(kube_node_status_allocatable{resource="cpu", fedscrape=""} * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum(kube_node_status_allocatable{resource="cpu", fedscrape=""} * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           fedscrape: "1m"
         record: cluster_cpu_total:hardware:schedulable
       - expr: |
-          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total"}[5m]) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total"}[5m]) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           unit: "core"
           fedscrape: "1m"
         record: cluster_cpu_total:schedulable
       - expr: |
-          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode="idle"}[5m]) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode="idle"}[5m]) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           mode: "idle"
           unit: "core"
           fedscrape: "1m"
         record: cluster_cpu_usage:irate:5m:schedulable
       - expr: |
-          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode=~"nice|system|user|irq|softirq"}[5m]) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum(irate({__name__=~"node_cpu_seconds_total|windows_cpu_time_total",mode=~"nice|system|user|irq|softirq"}[5m]) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           mode: "utilized"
           unit: "core"
@@ -144,13 +144,13 @@ groups:
 
       # cluster memory
       - expr: |
-          sum({__name__=~"node_memory_MemTotal_bytes|windows_cs_physical_memory_bytes"} * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum({__name__=~"node_memory_MemTotal_bytes|windows_cs_physical_memory_bytes"} * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           unit: "byte"
           fedscrape: "1m"
         record: cluster_memory_total:schedulable
       - expr: |
-          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"} * on(kubernetes_node) group_left() kubernetes_node_schedulable) / ignoring(unit, fedscrape) cluster_memory_total:schedulable
+          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"} * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0)) / ignoring(unit, fedscrape) cluster_memory_total:schedulable
         labels:
           mode: "free"
           unit: "percentage"
@@ -164,7 +164,7 @@ groups:
           fedscrape: "1m"
         record: cluster_memory_usage:schedulable
       - expr: |
-          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"} * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum({__name__=~"node_memory_MemAvailable_bytes|windows_os_physical_memory_free_bytes"} * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           mode: "free"
           unit: "byte"
@@ -180,13 +180,13 @@ groups:
 
       # cluster disk
       - expr: |
-          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_size_bytes{device=~"/dev/sd.*|/dev/nvme.*", fedscrape=""}) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_size_bytes{device=~"/dev/sd.*|/dev/nvme.*", fedscrape=""}) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           unit: "byte"
           fedscrape: "1m"
         record: cluster_disk_total:schedulable
       - expr: |
-          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() kubernetes_node_schedulable) / ignoring(unit, fedscrape) cluster_disk_total:schedulable
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0)) / ignoring(unit, fedscrape) cluster_disk_total:schedulable
         labels:
           mode: "free"
           unit: "percentage"
@@ -200,7 +200,7 @@ groups:
           fedscrape: "1m"
         record: cluster_disk_usage:schedulable
       - expr: |
-          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() kubernetes_node_schedulable)
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0))
         labels:
           mode: "free"
           unit: "byte"
@@ -289,18 +289,6 @@ groups:
           fedscrape: "1m"
         record: cluster_namespace_count:schedulable
 
-      # TODO do pods above request, not namespaces
-      - expr: |
-          sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container!=""} * on(node) group_left() node_schedulable) by (namespace) / sum(kube_pod_container_resource_requests:running{resource="cpu", unit="core"} * on(node) group_left() node_schedulable) by (namespace) > 1
-        labels:
-          fedscrape: "1m"
-        record: namespaces_above_request
-      - expr: |
-          count(namespaces_above_request) or vector(0)
-        labels:
-          fedscrape: "1m"
-        record: namespace_above_request_exists
-
       - expr: |
           sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable{container!=""}) by (namespace)
         labels:
@@ -328,13 +316,13 @@ groups:
 
       # nodes
       - expr: |
-          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_size_bytes{device=~"/dev/sd.*|/dev/nvme.*", fedscrape=""}) * on(kubernetes_node) group_left() kubernetes_node_schedulable) by (kubernetes_node)
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_size_bytes{device=~"/dev/sd.*|/dev/nvme.*", fedscrape=""}) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0)) by (kubernetes_node)
         labels:
           unit: "byte"
           fedscrape: "1m"
         record: nodes_disk_total:schedulable
       - expr: |
-          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() kubernetes_node_schedulable) by (kubernetes_node)
+          sum(avg without (pod, container, endpoint, fstype, job, mountpoint, namespace, service) (node_filesystem_free_bytes{device=~"/dev/sd.*|/dev/nvme.*"}) * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0)) by (kubernetes_node)
         labels:
           unit: "byte"
           mode: "free"
@@ -727,7 +715,7 @@ groups:
           fedscrape: "1m"
         record: kube_pod_container_resource_requests:running
       - expr: |
-          kube_pod_container_resource_requests:running * on (node) group_left() node_schedulable
+          kube_pod_container_resource_requests:running * on (node) group_left() (node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: kube_pod_container_resource_requests:running:schedulable
@@ -738,99 +726,99 @@ groups:
           fedscrape: "1m"
         record: kube_pod_container_resource_limits:running
       - expr: |
-          kube_pod_container_resource_limits:running * on (node) group_left() node_schedulable
+          kube_pod_container_resource_limits:running * on (node) group_left() (node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: kube_pod_container_resource_limits:running:schedulable
     - name: schedulable_nodes
       rules:
       - expr: |
-          node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container!=""} * on (node) group_left() node_schedulable
+          node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{container!=""} * on (node) group_left() (node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable
       - expr: |
-          container_memory_working_set_bytes{container!="", fedscrape=""} * on (instance) group_left() instance_schedulable
+          container_memory_working_set_bytes{container!="", fedscrape=""} * on (instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_memory_working_set_bytes:schedulable
       - expr: |
-          node_namespace_pod_container:container_memory_working_set_bytes{container!=""} * on (instance) group_left() instance_schedulable
+          node_namespace_pod_container:container_memory_working_set_bytes{container!=""} * on (instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: node_namespace_pod_container:container_memory_working_set_bytes:schedulable
       - expr: |
-          node_namespace_pod:kube_pod_info: * on(node) group_left() node_schedulable
+          node_namespace_pod:kube_pod_info: * on(node) group_left() (node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: node_namespace_pod:kube_pod_info:schedulable
       - expr: |
-          node_namespace_pod_container:container_memory_rss{fedscrape=""} * on(node) group_left() node_schedulable
+          node_namespace_pod_container:container_memory_rss{fedscrape=""} * on(node) group_left() (node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: node_namespace_pod_container:container_memory_rss:schedulable
       - expr: |
-          node_namespace_pod_container:container_memory_cache * on(node) group_left() node_schedulable
+          node_namespace_pod_container:container_memory_cache * on(node) group_left() (node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: node_namespace_pod_container:container_memory_cache:schedulable
       - expr: |
-          node_namespace_pod_container:container_memory_swap{fedscrape=""} * on(node) group_left() node_schedulable
+          node_namespace_pod_container:container_memory_swap{fedscrape=""} * on(node) group_left() (node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: node_namespace_pod_container:container_memory_swap:schedulable
       - expr: |
-          container_network_receive_bytes_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_network_receive_bytes_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_network_receive_bytes_total:schedulable
       - expr: |
-          container_network_receive_packets_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_network_receive_packets_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_network_receive_packets_total:schedulable
       - expr: |
-          container_network_transmit_packets_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_network_transmit_packets_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_network_transmit_packets_total:schedulable
       - expr: |
-          container_network_receive_packets_dropped_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_network_receive_packets_dropped_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_network_receive_packets_dropped_total:schedulable
       - expr: |
-          container_network_transmit_packets_dropped_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_network_transmit_packets_dropped_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_network_transmit_packets_dropped_total:schedulable
       - expr: |
-          container_network_transmit_bytes_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_network_transmit_bytes_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_network_transmit_bytes_total:schedulable
       - expr: |
-          kube_node_status_allocatable{fedscrape=""} * on(kubernetes_node) group_left() kubernetes_node_schedulable
+          kube_node_status_allocatable{fedscrape=""} * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: kube_node_status_allocatable:schedulable
       - expr: |
-          container_cpu_cfs_throttled_periods_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_cpu_cfs_throttled_periods_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_cpu_cfs_throttled_periods_total:schedulable
       - expr: |
-          container_cpu_cfs_periods_total{fedscrape=""} * on(instance) group_left() instance_schedulable
+          container_cpu_cfs_periods_total{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: container_cpu_cfs_periods_total:schedulable
       - expr: |
-          kubelet_running_pods{fedscrape=""} * on(instance) group_left() instance_schedulable
+          kubelet_running_pods{fedscrape=""} * on(instance) group_left() (instance_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: kubelet_running_pods:schedulable
       - expr: |
-          kube_pod_container_info{fedscrape=""} * on(kubernetes_node) group_left() kubernetes_node_schedulable
+          kube_pod_container_info{fedscrape=""} * on(kubernetes_node) group_left() (kubernetes_node_schedulable > 0)
         labels:
           fedscrape: "1m"
         record: kube_pod_container_info:schedulable
