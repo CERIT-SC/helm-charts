@@ -1,3 +1,4 @@
+# based on rules from rancher - https://github.com/rancher/charts/tree/dev-v2.6/charts/rancher-monitoring/rancher-monitoring/16.6.0/templates/prometheus/rules-1.14
 groups:
     - name: cerit_rules
       rules:
