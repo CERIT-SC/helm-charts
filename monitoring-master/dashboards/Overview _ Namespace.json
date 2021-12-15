@@ -22,7 +22,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 59,
-  "iteration": 1639559849803,
+  "iteration": 1639568894269,
   "links": [],
   "panels": [
     {
@@ -1238,35 +1238,11 @@
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "palette-classic"
+                "mode": "thresholds"
               },
               "custom": {
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 25,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "never",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
+                "align": "auto",
+                "displayMode": "auto"
               },
               "mappings": [],
               "min": 0,
@@ -1283,7 +1259,7 @@
                   }
                 ]
               },
-              "unit": "short"
+              "unit": "s"
             },
             "overrides": [
               {
@@ -1297,31 +1273,6 @@
                     "value": {
                       "fixedColor": "#F2495C",
                       "mode": "fixed"
-                    }
-                  },
-                  {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 2
-                  },
-                  {
-                    "id": "custom.stacking",
-                    "value": {
-                      "group": false,
-                      "mode": "normal"
-                    }
-                  },
-                  {
-                    "id": "custom.lineStyle",
-                    "value": {
-                      "dash": [
-                        10,
-                        10
-                      ],
-                      "fill": "dash"
                     }
                   }
                 ]
@@ -1338,31 +1289,6 @@
                       "fixedColor": "#FF9830",
                       "mode": "fixed"
                     }
-                  },
-                  {
-                    "id": "custom.fillOpacity",
-                    "value": 0
-                  },
-                  {
-                    "id": "custom.lineWidth",
-                    "value": 2
-                  },
-                  {
-                    "id": "custom.stacking",
-                    "value": {
-                      "group": false,
-                      "mode": "normal"
-                    }
-                  },
-                  {
-                    "id": "custom.lineStyle",
-                    "value": {
-                      "dash": [
-                        10,
-                        10
-                      ],
-                      "fill": "dash"
-                    }
                   }
                 ]
               }
@@ -1377,26 +1303,24 @@
           "id": 53,
           "links": [],
           "options": {
-            "legend": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "displayMode": "table",
-              "placement": "right"
-            },
-            "tooltip": {
-              "mode": "single"
-            }
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Value"
+              }
+            ]
           },
-          "pluginVersion": "8.0.3",
+          "pluginVersion": "8.1.5",
           "targets": [
             {
               "exemplar": true,
-              "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable{cluster=~\"$cluster\", namespace=~\"$namespace\"}) by (namespace)",
-              "format": "time_series",
+              "expr": "sum(delta(container_cpu_usage_seconds_total{cluster=~\"$cluster\", container!=\"\", namespace=~\"$namespace\"}[$__range])) by (namespace)",
+              "format": "table",
+              "instant": true,
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "{{namespace}}",
               "legendLink": null,
               "refId": "A",
               "step": 10
@@ -1405,7 +1329,19 @@
           "timeFrom": null,
           "timeShift": null,
           "title": "CPU Usage per Namespace",
-          "type": "timeseries"
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
+          "type": "table"
         },
         {
           "datasource": null,
