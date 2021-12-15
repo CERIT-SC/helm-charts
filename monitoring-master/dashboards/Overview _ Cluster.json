@@ -22,7 +22,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 60,
-  "iteration": 1639567811935,
+  "iteration": 1639572586328,
   "links": [],
   "panels": [
     {
@@ -2917,11 +2917,12 @@
           "id": 102,
           "links": [],
           "options": {
+            "frameIndex": 0,
             "showHeader": true,
             "sortBy": [
               {
                 "desc": true,
-                "displayName": "Value"
+                "displayName": "Real Usage"
               }
             ]
           },
@@ -2938,6 +2939,16 @@
               "legendLink": null,
               "refId": "A",
               "step": 10
+            },
+            {
+              "exemplar": true,
+              "expr": "sum(sum_over_time(kube_pod_container_resource_requests:running{cluster=~\"$cluster\", resource=\"cpu\"}[$__range]) * 120) by (namespace)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{namespace}}",
+              "refId": "B"
             }
           ],
           "timeFrom": null,
@@ -2945,13 +2956,20 @@
           "title": "CPU Usage per Namespace",
           "transformations": [
             {
+              "id": "merge",
+              "options": {}
+            },
+            {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true
                 },
                 "indexByName": {},
-                "renameByName": {}
+                "renameByName": {
+                  "Value #A": "Real Usage",
+                  "Value #B": "Requested Usage"
+                }
               }
             }
           ],
