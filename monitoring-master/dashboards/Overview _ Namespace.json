@@ -8,6 +8,12 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
@@ -16,7 +22,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 59,
-  "iteration": 1638264001046,
+  "iteration": 1639559849803,
   "links": [],
   "panels": [
     {
@@ -77,7 +83,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -134,7 +140,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -189,7 +195,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -246,7 +252,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -301,7 +307,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -360,7 +366,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -438,7 +444,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -521,7 +527,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -604,7 +610,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -687,7 +693,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -751,7 +757,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -810,7 +816,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -875,7 +881,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -1010,7 +1016,7 @@
       "options": {
         "showHeader": true
       },
-      "pluginVersion": "8.0.3",
+      "pluginVersion": "8.1.5",
       "targets": [
         {
           "exemplar": true,
@@ -1224,7 +1230,181 @@
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "CPU Usage",
+          "title": "CPU Usage per Pod",
+          "type": "timeseries"
+        },
+        {
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 25,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "never",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "quota - requests"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "#F2495C",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 2
+                  },
+                  {
+                    "id": "custom.stacking",
+                    "value": {
+                      "group": false,
+                      "mode": "normal"
+                    }
+                  },
+                  {
+                    "id": "custom.lineStyle",
+                    "value": {
+                      "dash": [
+                        10,
+                        10
+                      ],
+                      "fill": "dash"
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "quota - limits"
+                },
+                "properties": [
+                  {
+                    "id": "color",
+                    "value": {
+                      "fixedColor": "#FF9830",
+                      "mode": "fixed"
+                    }
+                  },
+                  {
+                    "id": "custom.fillOpacity",
+                    "value": 0
+                  },
+                  {
+                    "id": "custom.lineWidth",
+                    "value": 2
+                  },
+                  {
+                    "id": "custom.stacking",
+                    "value": {
+                      "group": false,
+                      "mode": "normal"
+                    }
+                  },
+                  {
+                    "id": "custom.lineStyle",
+                    "value": {
+                      "dash": [
+                        10,
+                        10
+                      ],
+                      "fill": "dash"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 30
+          },
+          "id": 53,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "displayMode": "table",
+              "placement": "right"
+            },
+            "tooltip": {
+              "mode": "single"
+            }
+          },
+          "pluginVersion": "8.0.3",
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:schedulable{cluster=~\"$cluster\", namespace=~\"$namespace\"}) by (namespace)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{pod}}",
+              "legendLink": null,
+              "refId": "A",
+              "step": 10
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "CPU Usage per Namespace",
           "type": "timeseries"
         },
         {
@@ -1420,7 +1600,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 30
+            "y": 37
           },
           "id": 17,
           "links": [],
@@ -1433,7 +1613,7 @@
               }
             ]
           },
-          "pluginVersion": "8.0.3",
+          "pluginVersion": "8.1.5",
           "targets": [
             {
               "exemplar": true,
@@ -1593,7 +1773,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 44
           },
           "id": 44,
           "options": {
@@ -1682,7 +1862,7 @@
             "h": 7,
             "w": 24,
             "x": 0,
-            "y": 44
+            "y": 51
           },
           "id": 46,
           "options": {
@@ -1694,7 +1874,7 @@
               }
             ]
           },
-          "pluginVersion": "8.0.3",
+          "pluginVersion": "8.1.5",
           "targets": [
             {
               "exemplar": true,
@@ -2783,5 +2963,5 @@
   "timezone": "",
   "title": "Overview / Namespace",
   "uid": "jVHNGUK7z",
-  "version": 3
+  "version": 1
 }
