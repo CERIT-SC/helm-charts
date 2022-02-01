@@ -196,11 +196,12 @@ loki:
       mountPath: /tmp
 
   persistence:
-    enabled: true
+    enabled: false
     accessModes:
     - ReadWriteOnce
     size: 2Ti
-    storageClass: "nfs-csi"
+    #storageClass: "nfs-csi"
+    #existingClaim: "claim-name"
 
 grafana:
   sidecar:
