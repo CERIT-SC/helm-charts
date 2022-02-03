@@ -97,11 +97,12 @@ prometheus:
             - "federated-prometheus-address"
 
     persistentVolume:
-      enabled: true
+      enabled: false
       accessModes:
         - ReadWriteOnce
       size: 1Ti
-      storageClass: "nfs-csi"
+      #storageClass: "nfs-csi"
+      #existingClaim: "claim-name"
   pushgateway:
     enabled: false
 
