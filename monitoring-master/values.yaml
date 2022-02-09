@@ -47,8 +47,13 @@ prometheus:
           mountPath: /etc/config_custom
           configMap: ceritsc-master-prometheus-rules-fedrules
           readOnly: true
+        - name: webconfig
+          mountPath: /etc/config_web
+          configMap: ceritsc-master-webconfig
+          readOnly: true
       extraArgs:
         volume-dir: /etc/config_custom
+        volume-dir: /etc/config_web
     alertmanager:
       enabled: false
 
@@ -58,12 +63,22 @@ prometheus:
     enabled: false
 
   server:
+    livenessProbeInitialDelay: 60
+    livenessProbeTimeout: 60
+    readinessProbeInitialDelay: 60
+    readinessProbeTimeout: 60
+    tcpSocketProbeEnabled: true
     extraArgs:
       enable-feature: remote-write-receiver
+      web.config.file: /etc/config_web/webconfig.yaml
     extraConfigmapMounts:
       - name: ceritsc-fedrules
         mountPath: /etc/config_custom
         configMap: ceritsc-master-prometheus-rules-fedrules
+        readOnly: true
+      - name: webconfig
+        mountPath: /etc/config_web
+        configMap: ceritsc-master-webconfig
         readOnly: true
     strategy:
       type: Recreate
