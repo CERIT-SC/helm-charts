@@ -17,7 +17,7 @@ spec:
       hostNetwork: true
       containers:
         - name: node-driver-registrar
-          image: {{ .Values.node.registrar }}
+          image: {{ .Values.node.registrar.image }}
           lifecycle:
             preStop:
               exec:

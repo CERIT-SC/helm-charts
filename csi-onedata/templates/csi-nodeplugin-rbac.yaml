@@ -32,6 +32,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-nodeplugin-onedata
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: csi-nodeplugin-onedata

@@ -32,6 +32,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-controller-onedata
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: external-controller-onedata
@@ -57,6 +58,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: csi-controller-onedata
+    namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: csi-cluster-driver-registrar-role-onedata
