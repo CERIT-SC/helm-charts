@@ -1,0 +1,63 @@
+# This YAML file contains attacher & csi driver API objects that are necessary
+# to run external CSI attacher for onedata
+
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: csi-controller-onedata
+spec:
+  serviceName: "csi-controller-onedata"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: csi-controller-onedata
+  template:
+    metadata:
+      labels:
+        app: csi-controller-onedata
+    spec:
+      serviceAccountName: csi-controller-onedata
+      containers:
+        - name: csi-attacher
+          image: {{ .Values.attacher.image }}
+          args:
+            - "--v=5"
+            - "--csi-address=$(ADDRESS)"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+        - name: csi-cluster-driver-registrar
+          image: {{ .Values.registrar.image }}
+          args:
+            - "--v=5"
+            - "--pod-info-mount-version=\"v1\""
+            - "--csi-address=$(ADDRESS)"
+          env:
+            - name: ADDRESS
+              value: /csi/csi.sock
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /csi
+        - name: onedata
+          image: {{ .Values.onedata.image }}
+          args :
+            - "--nodeid=$(NODE_ID)"
+            - "--endpoint=$(CSI_ENDPOINT)"
+          env:
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CSI_ENDPOINT
+              value: unix://plugin/csi.sock
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: socket-dir
+              mountPath: /plugin
+      volumes:
+        - name: socket-dir
+          emptyDir:

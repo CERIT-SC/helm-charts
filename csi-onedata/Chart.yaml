@@ -1,0 +1,6 @@
+apiVersion: v2
+name: csi-onedata
+description: A Helm chart for OneData storage class
+type: application
+version: 0.1
+appVersion: "0.1"
