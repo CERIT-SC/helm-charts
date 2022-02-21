@@ -354,6 +354,8 @@ prometheus:
       annotations:
         prometheus.io/scrape: "true"
   server:
+    extraArgs:
+      enable-feature: remote-write-receiver
     strategy:
       type: Recreate
     enabled: true
