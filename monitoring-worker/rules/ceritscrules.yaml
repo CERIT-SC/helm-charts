@@ -1752,6 +1752,26 @@ groups:
         labels:
           fedscrape: "1m"
         record: pilot_xds_cds_reject
+      - expr: |
+          kube_pod_created{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_created
+      - expr: |
+          kube_pod_deletion_timestamp{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_deletion_timestamp
+      - expr: |
+          kube_pod_start_time{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_start_time
+      - expr: |
+          kube_pod_completion_time{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: kube_pod_completion_time
           
     - name: workload_metrics
       rules:
