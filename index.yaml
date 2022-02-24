@@ -3,7 +3,7 @@ entries:
   csi-onedata:
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2022-02-21T23:22:44.816810402+01:00"
+    created: "2022-02-24T10:12:03.575594767+01:00"
     description: A Helm chart for OneData storage class
     digest: f904ec6ad4b520bf47abee3ca87c0b88dfe0985133a3f542b47b7955458464c9
     name: csi-onedata
@@ -13,7 +13,7 @@ entries:
     version: "0.3"
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2022-02-21T23:22:44.81652129+01:00"
+    created: "2022-02-24T10:12:03.574952776+01:00"
     description: A Helm chart for OneData storage class
     digest: ff79c70b25622fdada977422613414be966f665e15b30c8e72ddf256ef238850
     name: csi-onedata
@@ -23,7 +23,7 @@ entries:
     version: "0.2"
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2022-02-21T23:22:44.816223231+01:00"
+    created: "2022-02-24T10:12:03.57425629+01:00"
     description: A Helm chart for OneData storage class
     digest: 2254b27db3c3f2ab9a0a6ebc3508a6a307161d4991b751686adf818e62e8625c
     name: csi-onedata
@@ -34,7 +34,7 @@ entries:
   monitoring-master:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.915722929+01:00"
+    created: "2022-02-24T10:12:03.73717891+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -54,7 +54,7 @@ entries:
     version: 0.1.9
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.901588197+01:00"
+    created: "2022-02-24T10:12:03.71610866+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -74,7 +74,7 @@ entries:
     version: 0.1.8
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.888937786+01:00"
+    created: "2022-02-24T10:12:03.701232959+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -94,7 +94,7 @@ entries:
     version: 0.1.7
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.878838991+01:00"
+    created: "2022-02-24T10:12:03.685297512+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -114,7 +114,7 @@ entries:
     version: 0.1.6
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.868499209+01:00"
+    created: "2022-02-24T10:12:03.670530336+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -134,7 +134,7 @@ entries:
     version: 0.1.5
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.857333822+01:00"
+    created: "2022-02-24T10:12:03.655504163+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -154,7 +154,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.84512976+01:00"
+    created: "2022-02-24T10:12:03.639741565+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -174,7 +174,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.831871249+01:00"
+    created: "2022-02-24T10:12:03.612740971+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -195,7 +195,24 @@ entries:
   monitoring-worker:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.960426889+01:00"
+    created: "2022-02-24T10:12:03.821196488+01:00"
+    dependencies:
+    - name: promtail
+      repository: https://grafana.github.io/helm-charts
+      version: 3.8.1
+    - name: prometheus
+      repository: https://prometheus-community.github.io/helm-charts
+      version: 14.8.1
+    description: A Helm chart for Kubernetes
+    digest: 74bc5b3e2447dcb648903e4a56fed24f85434747c91b0d1c21407dcfaafa04b5
+    name: monitoring-worker
+    type: application
+    urls:
+    - monitoring-worker-0.1.8.tgz
+    version: 0.1.8
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2022-02-24T10:12:03.81001944+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -212,7 +229,7 @@ entries:
     version: 0.1.7
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.952861401+01:00"
+    created: "2022-02-24T10:12:03.79838975+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -229,7 +246,7 @@ entries:
     version: 0.1.6
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.945376304+01:00"
+    created: "2022-02-24T10:12:03.785302634+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -246,7 +263,7 @@ entries:
     version: 0.1.5
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.938006492+01:00"
+    created: "2022-02-24T10:12:03.773167134+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -263,7 +280,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.931046119+01:00"
+    created: "2022-02-24T10:12:03.760242409+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -280,7 +297,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-02-21T23:22:44.923446093+01:00"
+    created: "2022-02-24T10:12:03.748086673+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -295,4 +312,4 @@ entries:
     urls:
     - monitoring-worker-0.1.2.tgz
     version: 0.1.2
-generated: "2022-02-21T23:22:44.81579178+01:00"
+generated: "2022-02-24T10:12:03.573225057+01:00"
