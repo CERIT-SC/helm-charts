@@ -1772,6 +1772,11 @@ groups:
         labels:
           fedscrape: "1m"
         record: kube_pod_completion_time
+      - expr: |
+          k6_checks{fedscrape=""}
+        labels:
+          fedscrape: "1m"
+        record: k6_checks
           
     - name: workload_metrics
       rules:
