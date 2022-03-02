@@ -281,39 +281,39 @@ dashboards:
     home:
       file: "dashboards/Home.json"
     istio-control:
-      file: "dashboards/Istio Control Plane Dashboard.json"
+      file: "dashboards/IstioControlPlaneDashboard.json"
     istio-mesh:
-      file: "dashboards/Istio Mesh Dashboard.json"
+      file: "dashboards/IstioMeshDashboard.json"
     istio-performance:
-      file: "dashboards/Istio Performance Dashboard.json"
+      file: "dashboards/IstioPerformanceDashboard.json"
     istio-service:
-      file: "dashboards/Istio Service Dashboard.json"
+      file: "dashboards/IstioServiceDashboard.json"
     istio-workload:
-      file: "dashboards/Istio Workload Dashboard.json"
+      file: "dashboards/IstioWorkloadDashboard.json"
     kubernetes-api:
-      file: "dashboards/Kubernetes _ API server.json"
+      file: "dashboards/Kubernetes_APIserver.json"
     kubernetes-kubelet:
-      file: "dashboards/Kubernetes _ Kubelet.json"
+      file: "dashboards/Kubernetes_Kubelet.json"
     kubernetes-proxy:
-      file: "dashboards/Kubernetes _ Proxy.json"
+      file: "dashboards/Kubernetes_Proxy.json"
     kubernetes-scheduler:
-      file: "dashboards/Kubernetes _ Scheduler.json"
+      file: "dashboards/Kubernetes_Scheduler.json"
     kubernetes-statefulsets:
-      file: "dashboards/Kubernetes _ StatefulSets.json"
+      file: "dashboards/Kubernetes_StatefulSets.json"
     log-info:
-      file: "dashboards/Log info.json"
+      file: "dashboards/Loginfo.json"
     nginx-ingress:
-      file: "dashboards/NGINX _ Ingress Controller.json"
+      file: "dashboards/NGINX_IngressController.json"
     nginx-request:
-      file: "dashboards/NGINX _ Request Handling Performance.json"
+      file: "dashboards/NGINX_RequestHandlingPerformance.json"
     overview-cluster:
-      file: "dashboards/Overview _ Cluster.json"
+      file: "dashboards/Overview_Cluster.json"
     overview-namespace:
-      file: "dashboards/Overview _ Namespace.json"
+      file: "dashboards/Overview_Namespace.json"
     overview-node:
-      file: "dashboards/Overview _ Node.json"
+      file: "dashboards/Overview_Node.json"
     overview-prometheus:
-      file: "dashboards/Overview _ Prometheus.json"
+      file: "dashboards/Overview_Prometheus.json"
     overview-workload:
-      file: "dashboards/Overview _ Workload.json"
+      file: "dashboards/Overview_Workload.json"
 dashboardslabel: "grafana_dashboard"
