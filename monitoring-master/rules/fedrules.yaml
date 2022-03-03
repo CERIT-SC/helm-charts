@@ -9,13 +9,13 @@ groups:
         record: loki:oom:count:5m:schedulable
     - name: hack
       rules:
-      - expr:
+      - expr: |
           sum by (cluster, namespace, pod, container, id) (
             irate(container_cpu_usage_seconds_total{job="kubernetes-nodes-cadvisor", image!=""}[5m])
           ) * on (cluster, namespace, pod) group_left(node) topk by (cluster, namespace, pod) (
             1, max by(cluster, namespace, pod, node) (kube_pod_info{node!=""})
           )
         record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:id
-      - expr:
+      - expr: |
           label_replace(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:id, "uid", "$1", "id", ".*pod(.+)/.*")
         record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate:uid
