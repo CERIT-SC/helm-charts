@@ -231,7 +231,7 @@ groups:
 #          fedscrape: "1m"
 #        record: cluster_memory_usage:schedulable
       - expr: |
-          cluster_memory_usage{mode="free", unit="byte"} / ignoring(unit, fedscrape) cluster_memory_total
+          cluster_memory_usage{mode="free", unit="byte"} / ignoring(unit, fedscrape, mode) cluster_memory_total
         labels:
           mode: "free"
           unit: "percentage"
