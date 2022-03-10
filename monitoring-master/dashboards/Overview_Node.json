@@ -1324,7 +1324,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running:schedulable{cluster=~\"$cluster\",node=~\"$node\",resource=\"cpu\",unit=\"core\"})",
+          "expr": "sum(kube_pod_container_resource_requests:running{cluster=~\"$cluster\",node=~\"$node\",resource=\"cpu\",unit=\"core\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1381,7 +1381,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running:schedulable{cluster=~\"$cluster\",node=~\"$node\",resource=\"memory\",unit=\"byte\"})",
+          "expr": "sum(kube_pod_container_resource_requests:running{cluster=~\"$cluster\",node=~\"$node\",resource=\"memory\",unit=\"byte\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1436,7 +1436,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_limits:running:schedulable{cluster=~\"$cluster\", node=~\"$node\",resource=\"cpu\",unit=\"core\"})",
+          "expr": "sum(kube_pod_container_resource_limits:running{cluster=~\"$cluster\", node=~\"$node\",resource=\"cpu\",unit=\"core\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1493,7 +1493,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_limits:running:schedulable{cluster=~\"$cluster\",node=~\"$node\",resource=\"memory\",unit=\"byte\"})",
+          "expr": "sum(kube_pod_container_resource_limits:running{cluster=~\"$cluster\",node=~\"$node\",resource=\"memory\",unit=\"byte\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1548,7 +1548,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(node_namespace_pod:kube_pod_info:schedulable{node=~\"$node\",cluster=~\"$cluster\"})",
+          "expr": "sum(node_namespace_pod:kube_pod_info{node=~\"$node\",cluster=~\"$cluster\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1607,7 +1607,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running:schedulable{resource=\"cerit_io_gpu_count\",node=~\"$node\",cluster=~\"$cluster\"}) or vector(0)",
+          "expr": "sum(kube_pod_container_resource_requests:running{resource=\"cerit_io_gpu_count\",node=~\"$node\",cluster=~\"$cluster\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1685,7 +1685,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(nodes_cpu_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\", unit=\"cores\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_requests:running:schedulable{cluster=~\"$cluster\", node=~\"$node\", resource=\"cpu\", unit=\"core\"})",
+          "expr": "sum(nodes_cpu_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\", unit=\"cores\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_requests:running{cluster=~\"$cluster\", node=~\"$node\", resource=\"cpu\", unit=\"core\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1768,7 +1768,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(nodes_memory_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\", unit=\"bytes\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_requests:running:schedulable{cluster=~\"$cluster\", node=~\"$node\",resource=\"memory\"})",
+          "expr": "sum(nodes_memory_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\", unit=\"bytes\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_requests:running{cluster=~\"$cluster\", node=~\"$node\",resource=\"memory\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1851,7 +1851,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(nodes_cpu_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\", unit=\"cores\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_limits:running:schedulable{cluster=~\"$cluster\", node=~\"$node\", resource=\"cpu\", unit=\"core\"})",
+          "expr": "sum(nodes_cpu_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\", unit=\"cores\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_limits:running{cluster=~\"$cluster\", node=~\"$node\", resource=\"cpu\", unit=\"core\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1934,7 +1934,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(nodes_memory_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\",unit=\"bytes\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_limits:running:schedulable{cluster=~\"$cluster\", node=~\"$node\",resource=\"memory\"})",
+          "expr": "sum(nodes_memory_usage{cluster=~\"$cluster\", kubernetes_node=~\"$node\",unit=\"bytes\", mode=\"utilized\", type=\"containers\"}) / sum(kube_pod_container_resource_limits:running{cluster=~\"$cluster\", node=~\"$node\",resource=\"memory\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1998,7 +1998,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running:schedulable{resource=\"rdma_hca\",node=~\"$node\",cluster=~\"$cluster\"}) or vector(0)",
+          "expr": "sum(kube_pod_container_resource_requests:running{resource=\"rdma_hca\",node=~\"$node\",cluster=~\"$cluster\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -2057,7 +2057,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running:schedulable{resource=\"cerit_io_gpu_mem\",node=~\"$node\",cluster=~\"$cluster\"}) or vector(0)",
+          "expr": "sum(kube_pod_container_resource_requests:running{resource=\"cerit_io_gpu_mem\",node=~\"$node\",cluster=~\"$cluster\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -3959,7 +3959,7 @@
           ]
         },
         "datasource": null,
-        "definition": "label_values(schedulable_nodes{cluster=~\"$cluster\"}, node)",
+        "definition": "label_values(kubernetes_node_schedulable{cluster=~\"$cluster\"}, kubernetes_node)",
         "description": "node",
         "error": null,
         "hide": 0,
@@ -3969,7 +3969,7 @@
         "name": "node",
         "options": [],
         "query": {
-          "query": "label_values(schedulable_nodes{cluster=~\"$cluster\"}, node)",
+          "query": "label_values(kubernetes_node_schedulable{cluster=~\"$cluster\"}, kubernetes_node)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
