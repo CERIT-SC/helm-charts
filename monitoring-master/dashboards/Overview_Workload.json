@@ -364,7 +364,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running:workload{resource=\"cerit_io_gpu_count\",workload=~\"$workload\",cluster=~\"$cluster\"}) or vector(0)",
+          "expr": "sum(kube_pod_container_resource_requests:running:workload{resource=\"nvidia_com_gpu\",workload=~\"$workload\",cluster=~\"$cluster\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"

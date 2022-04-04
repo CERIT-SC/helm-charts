@@ -370,7 +370,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running{resource=\"cerit_io_gpu_count\",namespace=~\"$namespace\",cluster=~\"$cluster\"}) or vector(0)",
+          "expr": "sum(kube_pod_container_resource_requests:running{resource=\"nvidia_com_gpu\",namespace=~\"$namespace\",cluster=~\"$cluster\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"

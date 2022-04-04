@@ -432,7 +432,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_node_status_allocatable{resource=\"cerit_io_gpu_count\",cluster=~\"$cluster\"}) or vector(0)",
+          "expr": "sum(kube_node_status_allocatable{resource=\"nvidia_com_gpu\",cluster=~\"$cluster\"}) or vector(0)",
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -1192,7 +1192,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "(sum(kube_pod_container_resource_requests:running{resource=\"cerit_io_gpu_count\",cluster=~\"$cluster\"}) or vector(0))/ (sum(kube_node_status_allocatable{resource=\"cerit_io_gpu_count\",cluster=~\"$cluster\"}) or vector(1))",
+          "expr": "(sum(kube_pod_container_resource_requests:running{resource=\"nvidia_com_gpu\",cluster=~\"$cluster\"}) or vector(0))/ (sum(kube_node_status_allocatable{resource=\"nvidia_com_gpu\",cluster=~\"$cluster\"}) or vector(1))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -1611,7 +1611,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kube_pod_container_resource_requests:running{resource=\"cerit_io_gpu_count\",cluster=~\"$cluster\"}) or vector(0)",
+          "expr": "sum(kube_pod_container_resource_requests:running{resource=\"nvidia_com_gpu\",cluster=~\"$cluster\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
