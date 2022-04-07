@@ -12,7 +12,7 @@
       }
     ]
   },
-  "editable": false,
+  "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
   "id": 58,
@@ -1348,8 +1348,8 @@
         "allValue": ".*",
         "current": {
           "selected": false,
-          "text": "hdha",
-          "value": "hdha"
+          "text": "kuba",
+          "value": "kuba"
         },
         "datasource": null,
         "definition": "label_values(cluster)",

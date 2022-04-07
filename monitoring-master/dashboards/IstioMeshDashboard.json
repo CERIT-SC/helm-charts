@@ -13,7 +13,7 @@
     ]
   },
   "description": "Istio Mesh Dashboard version 1.9.6",
-  "editable": false,
+  "editable": true,
   "gnetId": 7639,
   "graphTooltip": 0,
   "id": 12,

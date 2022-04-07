@@ -12,7 +12,7 @@
       }
     ]
   },
-  "editable": false,
+  "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
   "id": 26,
@@ -720,8 +720,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "hdha",
-          "value": "hdha"
+          "text": "kuba",
+          "value": "kuba"
         },
         "datasource": "$datasource",
         "definition": "",

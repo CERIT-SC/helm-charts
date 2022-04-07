@@ -12,7 +12,7 @@
       }
     ]
   },
-  "editable": false,
+  "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
   "id": 52,
@@ -3921,10 +3921,10 @@
         "current": {
           "selected": false,
           "text": [
-            "hdhu"
+            "kuba"
           ],
           "value": [
-            "hdhu"
+            "kuba"
           ]
         },
         "datasource": null,

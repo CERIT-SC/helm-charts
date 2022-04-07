@@ -13,7 +13,7 @@
     ]
   },
   "description": "Istio Performance Dashboard version 1.9.6",
-  "editable": false,
+  "editable": true,
   "gnetId": 11829,
   "graphTooltip": 0,
   "id": 13,

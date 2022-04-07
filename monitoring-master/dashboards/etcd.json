@@ -13,7 +13,7 @@
     ]
   },
   "description": "etcd sample Grafana dashboard with Prometheus",
-  "editable": false,
+  "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
   "id": 9,
@@ -1517,8 +1517,8 @@
         "allValue": ".*",
         "current": {
           "selected": false,
-          "text": "hdha",
-          "value": "hdha"
+          "text": "kuba",
+          "value": "kuba"
         },
         "datasource": null,
         "definition": "label_values(cluster)",
