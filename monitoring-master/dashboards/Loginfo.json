@@ -39,7 +39,7 @@
       "pluginVersion": "8.0.3",
       "targets": [
         {
-          "expr": "{source=\"promtail\",cluster=~\"$cluster\",container=\"kube-apiserver\"} |= \"delete\" |= \"authorization.k8s.io/reason\" != \"to ServiceAccount\" !~ \"to User.*system:kube\" | json | annotations_authorization_k8s_io_reason != \"\" | annotations_authorization_k8s_io_decision = \"allow\" | objectRef_name != \"\" | line_format \"❌ {{TrimRight .objectRef_resource \\\"s\\\"}} {{.objectRef_name}} DELETED due to authorization from {{.impersonatedUser_username}}\"",
+          "expr": "{source=\"promtail\",cluster=~\"$cluster\",container=\"kube-apiserver\"} |= \"delete\" |= \"authorization.k8s.io/reason\" | json | annotations_authorization_k8s_io_reason != \"\" | annotations_authorization_k8s_io_decision = \"allow\" | objectRef_name != \"\" | line_format \"❌ {{TrimRight .objectRef_resource \\\"s\\\"}} {{.objectRef_name}} DELETED due to authorization from {{.impersonatedUser_username}}{{if contains \\\"to ServiceAccount\\\" .annotations_authorization_k8s_io_reason}}Service Account{{end}}{{if contains \\\"to User.*system:kube\\\" .annotations_authorization_k8s_io_reason}}Kube System{{end}}\"",
           "hide": false,
           "instant": false,
           "legendFormat": "{{objectRef_name}} - {{annotations_authorization_k8s_io_reason}}",
@@ -47,7 +47,7 @@
           "refId": "A"
         },
         {
-          "expr": "{source=\"promtail\",cluster=~\"$cluster\",container=\"kube-apiserver\"} |= \"create\" |= \"authorization.k8s.io/reason\" != \"to ServiceAccount\" !~ \"to User.*system:kube\" | json | annotations_authorization_k8s_io_reason != \"\" | annotations_authorization_k8s_io_decision = \"allow\" | objectRef_name != \"\" | line_format \"✅ {{TrimRight .objectRef_resource \\\"s\\\"}} {{.objectRef_name}} CREATED due to authorization from {{.impersonatedUser_username}}\"",
+          "expr": "{source=\"promtail\",cluster=~\"$cluster\",container=\"kube-apiserver\"} |= \"create\" |= \"authorization.k8s.io/reason\" | json | annotations_authorization_k8s_io_reason != \"\" | annotations_authorization_k8s_io_decision = \"allow\" | objectRef_name != \"\" | line_format \"✅ {{TrimRight .objectRef_resource \\\"s\\\"}} {{.objectRef_name}} CREATED due to authorization from {{.impersonatedUser_username}}{{if contains \\\"to ServiceAccount\\\" .annotations_authorization_k8s_io_reason}}Service Account{{end}}{{if contains \\\"to User.*system:kube\\\" .annotations_authorization_k8s_io_reason}}Kube System{{end}}\"",
           "hide": false,
           "refId": "B"
         }
