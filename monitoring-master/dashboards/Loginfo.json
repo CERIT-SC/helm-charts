@@ -3,24 +3,36 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       }
     ]
   },
   "editable": true,
-  "gnetId": null,
+  "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 54,
-  "iteration": 1638263895985,
+  "iteration": 1651555775439,
   "links": [],
+  "liveNow": false,
   "panels": [
     {
-      "datasource": "Loki",
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
       "gridPos": {
         "h": 8,
         "w": 24,
@@ -31,6 +43,8 @@
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
         "showLabels": false,
         "showTime": false,
         "sortOrder": "Descending",
@@ -52,7 +66,7 @@
           "refId": "B"
         }
       ],
-      "title": "Kubernetes operations (excluding service accounts)",
+      "title": "Kubernetes operations",
       "transformations": [
         {
           "id": "seriesToRows",
@@ -62,7 +76,10 @@
       "type": "logs"
     },
     {
-      "datasource": "Loki",
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -73,6 +90,8 @@
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
         "showLabels": false,
         "showTime": false,
         "sortOrder": "Descending",
@@ -80,7 +99,11 @@
       },
       "targets": [
         {
-          "expr": "{job=\"systemd-journal\", cluster=~\"$cluster\"} |= \"segfault\" | regexp \"(?P<program>\\\\w+)\\\\[(?P<pid>[0-9]+)\\\\].*\" | line_format \"⚠️ Program \\\"{{.program}}\\\" with PID {{.pid}} has ended due to SEGFAULT\"",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "expr": "{job=\"systemd-journal\", cluster=~\"$cluster\"} |= \"segfault\" | regexp \"(?P<program>.*)\\\\[(?P<pid>[0-9]+)\\\\].*\" | line_format \"⚠️ Program \\\"{{.program}}\\\" with PID {{.pid}} has ended due to SEGFAULT\"",
           "refId": "A"
         }
       ],
@@ -88,7 +111,10 @@
       "type": "logs"
     },
     {
-      "datasource": "Loki",
+      "datasource": {
+        "type": "loki",
+        "uid": "P8E80F9AEF21F6940"
+      },
       "gridPos": {
         "h": 8,
         "w": 12,
@@ -99,6 +125,8 @@
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
         "showLabels": false,
         "showTime": false,
         "sortOrder": "Descending",
@@ -106,7 +134,11 @@
       },
       "targets": [
         {
-          "expr": "{source=\"promtail\", job=\"systemd-journal\", cluster=~\"$cluster\"} |= \"oom-kill:\" | regexp \".*kubepods.burstable.(?P<pod>.+),task_.*task=(?P<task>.+),pid=(?P<pid>[0-9]+).*\" | line_format \"☠️ Process \\\"{{.task}}\\\" with PID {{.pid}} in pod \\\"{{.pod}}\\\" was killed by oom-kill\"",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "expr": "{source=\"promtail\", job=\"systemd-journal\", cluster=~\"$cluster\"} |= \"oom-kill:\" | regexp \".*task_memcg..[^/]*.(?P<pod>[^/]+).*task=(?P<task>.+),pid=(?P<pid>[0-9]+),uid=(?P<uid>[0-9]+)\" | line_format \"☠️ Process \\\"{{.task}}\\\" with PID {{.pid}} (run under UID {{.uid}}) in pod \\\"{{.pod}}\\\" was killed by oom-kill\"",
           "refId": "A"
         }
       ],
@@ -114,13 +146,12 @@
       "type": "logs"
     }
   ],
-  "schemaVersion": 30,
+  "schemaVersion": 36,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": null,
         "current": {
           "selected": true,
           "text": [
@@ -130,10 +161,12 @@
             "kuba"
           ]
         },
-        "datasource": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
         "definition": "label_values(cluster)",
         "description": "cluster",
-        "error": null,
         "hide": 0,
         "includeAll": true,
         "label": "cluster",
@@ -160,5 +193,6 @@
   "timezone": "",
   "title": "Log info",
   "uid": "c-AXPfd7z",
-  "version": 18
+  "version": 1,
+  "weekStart": ""
 }
