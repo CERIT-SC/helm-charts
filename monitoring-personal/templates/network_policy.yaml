@@ -13,7 +13,6 @@ spec:
       app: prometheus
   policyTypes:
     - Ingress
-    - Egress
   ingress:
     - from:
         - namespaceSelector:
@@ -42,7 +41,6 @@ spec:
       app: project-stats
   policyTypes:
     - Ingress
-    - Egress
   ingress:
     - from:
         - namespaceSelector:
