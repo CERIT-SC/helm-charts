@@ -1,0 +1,31 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: project-stats
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "8080"
+  labels:
+    app: project-stats
+spec:
+  securityContext:
+    {{- if $.Values.statsUser }}
+    runAsUser: {{ $.Values.statsUser }}
+    {{- else }}
+    runAsUser: 1000
+    {{- end }}
+    {{- if $.Values.statsGroup }}
+    runAsGroup: {{ $.Values.statsGroup }}
+    {{- else }}
+    runAsGroup: 1000
+    {{- end }}
+  containers:
+  - name: project-stats
+    {{- if $.Values.statsImage }}
+    image: {{ $.Values.statsImage }}
+    {{- else }}
+    image: cerit.io/project-stats:v0.05
+    {{- end }}
+    imagePullPolicy: Always

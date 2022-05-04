@@ -1,0 +1,75 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-prometheus-network-policy
+  {{- if $.Values.namespace }}
+  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  namespace: {{ $.Release.namespace }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      app: prometheus
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- if $.Values.namespace }}
+              kubernetes.io/metadata.name: {{ $.Values.namespace }}
+              {{- else }}
+              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              {{- end }}
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              {{- if $.Values.namespace }}
+              kubernetes.io/metadata.name: {{ $.Values.namespace }}
+              {{- else }}
+              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-stats-network-policy
+  {{- if $.Values.namespace }}
+  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  namespace: {{ $.Release.namespace }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      app: project-stats
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- if $.Values.namespace }}
+              kubernetes.io/metadata.name: {{ $.Values.namespace }}
+              {{- else }}
+              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              {{- end }}
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              {{- if $.Values.namespace }}
+              kubernetes.io/metadata.name: {{ $.Values.namespace }}
+              {{- else }}
+              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              {{- end }}

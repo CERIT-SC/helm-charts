@@ -1,0 +1,42 @@
+# edited from grafana helm chart
+{{- if .Values.dashboards }}
+{{ $files := .Files }}
+{{- range $provider, $dashboards := .Values.dashboards }}
+{{- if $dashboards }}
+{{- range $key, $value := $dashboards }}
+{{- $dashboardFound := false }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-dashboards-{{ $provider }}-{{ $key }}
+  {{- if $.Values.namespace }}
+  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  namespace: {{ $.Release.Namespace }}
+  {{- end }}
+  labels:
+    dashboard-provider: {{ $provider }}
+    {{- if $.Values.dashboardslabel }}
+    {{ $.Values.dashboardslabel }}: "1"
+    {{- end }}
+data:
+{{- if (or (hasKey $value "json") (hasKey $value "file")) }}
+{{- $dashboardFound = true }}
+{{ print $key | indent 2 }}.json:
+{{- if hasKey $value "json" }}
+    |-
+{{ $value.json | indent 6 }}
+{{- end }}
+{{- if hasKey $value "file" }}
+{{ toYaml ( $files.Get $value.file ) | indent 4}}
+{{- end }}
+{{- end }}
+{{- if not $dashboardFound }}
+  {}
+{{- end }}
+---
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
