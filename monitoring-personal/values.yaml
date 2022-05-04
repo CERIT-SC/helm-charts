@@ -24,11 +24,11 @@ prometheus:
       enabled: false
     resources:
       requests:
-        cpu: 200m
-        memory: 128Mi
+        cpu: 10m
+        memory: 16Mi
       limits:
-        cpu: 400m
-        memory: 256Mi
+        cpu: 25m
+        memory: 32Mi
   kubeStateMetrics:
     enabled: false
   nodeExporter:
@@ -54,11 +54,11 @@ prometheus:
       enabled: false
     resources:
       requests:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 50m
+        memory: 256Mi
       limits:
-        cpu: 1
-        memory: 1Gi
+        cpu: 200m
+        memory: 512Mi
   pushgateway:
     enabled: false
   serverFiles:
@@ -105,12 +105,12 @@ prometheus:
 grafana:
   sidecar:
     resources:
-     limits:
-       cpu: 100m
-       memory: 100Mi
      requests:
-       cpu: 50m
-       memory: 50Mi
+       cpu: 10m
+       memory: 64Mi
+     limits:
+       cpu: 25m
+       memory: 128Mi
     dashboards:
       enabled: true
       label: grafana_dashboard
@@ -133,11 +133,11 @@ grafana:
   adminPassword: adminpassword
   resources:
     requests:
-      cpu: 400m
-      memory: 512Mi
+      cpu: 50m
+      memory: 64Mi
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 128Mi
 
   grafana.ini:
     dashboards:
