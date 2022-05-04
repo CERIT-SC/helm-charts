@@ -11,21 +11,28 @@ metadata:
     app: project-stats
 spec:
   securityContext:
-    {{- if $.Values.statsUser }}
-    runAsUser: {{ $.Values.statsUser }}
+    {{- if $.Values.stats.securityContext.runAsUser }}
+    runAsUser: {{ $.Values.stats.securityContext.runAsUser }}
     {{- else }}
     runAsUser: 1000
     {{- end }}
-    {{- if $.Values.statsGroup }}
-    runAsGroup: {{ $.Values.statsGroup }}
+    {{- if $.Values.stats.securityContext.runAsUser }}
+    runAsGroup: {{ $.Values.stats.securityContext.runAsUser }}
     {{- else }}
     runAsGroup: 1000
     {{- end }}
   containers:
   - name: project-stats
-    {{- if $.Values.statsImage }}
-    image: {{ $.Values.statsImage }}
+    {{- if $.Values.stats.image }}
+    image: {{ $.Values.stats.image }}
     {{- else }}
     image: cerit.io/project-stats:v0.05
     {{- end }}
     imagePullPolicy: Always
+    resources:
+      requests:
+        cpu: {{ $.Values.stats.resources.requests.cpu }}
+        memory: {{ $.Values.stats.resources.requests.memory }}
+      limits:
+        cpu: {{ $.Values.stats.resources.limits.cpu }}
+        memory: {{ $.Values.stats.resources.limits.memory }}

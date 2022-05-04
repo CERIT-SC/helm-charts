@@ -20,15 +20,15 @@ prometheus:
   configmapReload:
     prometheus:
       enabled: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits:
+          cpu: 25m
+          memory: 32Mi
     alertmanager:
       enabled: false
-    resources:
-      requests:
-        cpu: 10m
-        memory: 16Mi
-      limits:
-        cpu: 25m
-        memory: 32Mi
   kubeStateMetrics:
     enabled: false
   nodeExporter:
@@ -149,3 +149,15 @@ dashboards:
       file: "dashboards/Home.json"
 dashboardslabel: "grafana_dashboard"
 datasourcelabel: "grafana_datasource"
+stats:
+  image: cerit.io/project-stats:v0.05
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+  resources:
+    requests:
+      cpu: 20m
+      memory: 16Mi
+    limits:
+      cpu: 80m
+      memory: 64Mi
