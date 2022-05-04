@@ -5,7 +5,7 @@ metadata:
   {{- if $.Values.namespace }}
   namespace: {{ $.Values.namespace }}
   {{- else }}
-  namespace: {{ $.Release.namespace }}
+  namespace: {{ $.Release.Namespace }}
   {{- end }}
 spec:
   podSelector:
@@ -21,7 +21,7 @@ spec:
               {{- if $.Values.namespace }}
               kubernetes.io/metadata.name: {{ $.Values.namespace }}
               {{- else }}
-              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              kubernetes.io/metadata.name: {{ $.Release.Namespace }}
               {{- end }}
       ports:
         - protocol: TCP
@@ -33,7 +33,7 @@ spec:
               {{- if $.Values.namespace }}
               kubernetes.io/metadata.name: {{ $.Values.namespace }}
               {{- else }}
-              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              kubernetes.io/metadata.name: {{ $.Release.Namespace }}
               {{- end }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -43,7 +43,7 @@ metadata:
   {{- if $.Values.namespace }}
   namespace: {{ $.Values.namespace }}
   {{- else }}
-  namespace: {{ $.Release.namespace }}
+  namespace: {{ $.Release.Namespace }}
   {{- end }}
 spec:
   podSelector:
@@ -59,7 +59,7 @@ spec:
               {{- if $.Values.namespace }}
               kubernetes.io/metadata.name: {{ $.Values.namespace }}
               {{- else }}
-              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              kubernetes.io/metadata.name: {{ $.Release.Namespace }}
               {{- end }}
       ports:
         - protocol: TCP
@@ -71,5 +71,5 @@ spec:
               {{- if $.Values.namespace }}
               kubernetes.io/metadata.name: {{ $.Values.namespace }}
               {{- else }}
-              kubernetes.io/metadata.name: {{ $.Release.namespace }}
+              kubernetes.io/metadata.name: {{ $.Release.Namespace }}
               {{- end }}
