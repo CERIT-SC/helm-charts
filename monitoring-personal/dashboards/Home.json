@@ -908,7 +908,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": [
           {
@@ -1022,7 +1022,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\"}) by (pod)",
+          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"}) by (pod)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1468,7 +1468,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", container!=\"\"}) by (pod)",
+          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", container!=\"\", resource=\"memory\"}) by (pod)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1909,6 +1909,6 @@
   "timezone": "",
   "title": "Overview",
   "uid": "jVHNGUK7z",
-  "version": 5,
+  "version": 1,
   "weekStart": ""
 }
