@@ -62,7 +62,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "orange",
                 "value": null
               }
             ]
@@ -101,7 +101,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_request{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"})",
+          "expr": "sum(container_resource_request{namespace=~\"$namespace\", resource=\"cpu\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -126,7 +126,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "orange",
                 "value": null
               }
             ]
@@ -165,7 +165,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_request{kubernetes_namespace=~\"$namespace\",resource=\"memory\"})",
+          "expr": "sum(container_resource_request{namespace=~\"$namespace\",resource=\"memory\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -189,7 +189,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "semi-dark-orange",
                 "value": null
               }
             ]
@@ -227,7 +227,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_limit{kubernetes_namespace=~\"$namespace\",resource=\"cpu\"})",
+          "expr": "sum(container_resource_limit{namespace=~\"$namespace\",resource=\"cpu\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -252,7 +252,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "semi-dark-orange",
                 "value": null
               }
             ]
@@ -291,7 +291,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_limit{kubernetes_namespace=~\"$namespace\",resource=\"memory\"})",
+          "expr": "sum(container_resource_limit{namespace=~\"$namespace\",resource=\"memory\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -353,7 +353,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "count(max(container_resource_request{kubernetes_namespace=~\"$namespace\"}) by (pod))",
+          "expr": "count(max(container_resource_request{namespace=~\"$namespace\"}) by (pod))",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -379,10 +379,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -419,7 +415,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_request{resource=\"nvidia_com_gpu\",kubernetes_namespace=~\"$namespace\"}) or vector(0)",
+          "expr": "sum(container_resource_request{resource=\"nvidia_com_gpu\",namespace=~\"$namespace\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -502,7 +498,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"}) / sum(container_resource_request{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"})",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"cpu\"}) / sum(container_resource_request{namespace=~\"$namespace\", resource=\"cpu\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -588,7 +584,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"memory\"}) / sum(container_resource_request{kubernetes_namespace=~\"$namespace\", resource=\"memory\"})",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"memory\"}) / sum(container_resource_request{namespace=~\"$namespace\", resource=\"memory\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -674,7 +670,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"}) / sum(container_resource_limit{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"})",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"cpu\"}) / sum(container_resource_limit{namespace=~\"$namespace\", resource=\"cpu\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -760,7 +756,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"memory\"}) / sum(container_resource_limit{kubernetes_namespace=~\"$namespace\", resource=\"memory\"})",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"memory\"}) / sum(container_resource_limit{namespace=~\"$namespace\", resource=\"memory\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -789,10 +785,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -829,7 +821,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_request{kubernetes_namespace=~\"$namespace\", resource=\"cerito_io_gpumem\"}) or vector(0)",
+          "expr": "sum(container_resource_request{namespace=~\"$namespace\", resource=\"cerit.io/gpu-mem\"}) or vector(0)",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -837,6 +829,601 @@
       ],
       "title": "GPU Memory (GB)",
       "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 36,
+      "panels": [],
+      "title": "Quotas",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 14
+      },
+      "id": 38,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "namespace_quota{type=\"request\", resource=\"cpu\", namespace=~\"$namespace\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Request Quota",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
+        "y": 14
+      },
+      "id": 39,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "namespace_quota{type=\"request\", resource=\"memory\", namespace=~\"$namespace\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory Request Quota",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
+        "y": 14
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "namespace_quota{type=\"limit\", resource=\"cpu\", namespace=~\"$namespace\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Limit Quota",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 12,
+        "y": 14
+      },
+      "id": 42,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "expr": "namespace_quota{type=\"limit\", resource=\"memory\", namespace=~\"$namespace\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory Limit Quota",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 0,
+        "y": 20
+      },
+      "id": 43,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "sum(container_resource_request{namespace=~\"$namespace\", resource=\"cpu\"}) by (namespace) / on(namespace) namespace_quota{type=\"request\", resource=\"cpu\", namespace=~\"$namespace\"}",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Request Quota Usage",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 4,
+        "y": 20
+      },
+      "id": 44,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "sum(container_resource_request{namespace=~\"$namespace\", resource=\"memory\"}) by (namespace) / on(namespace) namespace_quota{type=\"request\", resource=\"memory\", namespace=~\"$namespace\"}",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory Request Quota Usage",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 8,
+        "y": 20
+      },
+      "id": 45,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "sum(container_resource_limit{namespace=~\"$namespace\", resource=\"cpu\"}) by (namespace) / on(namespace) namespace_quota{type=\"limit\", resource=\"cpu\", namespace=~\"$namespace\"}",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Limit Quota Usage",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "#299c46",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 12,
+        "y": 20
+      },
+      "id": 46,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.5.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "exemplar": true,
+          "expr": "sum(container_resource_limit{namespace=~\"$namespace\", resource=\"memory\"}) by (namespace) / on(namespace) namespace_quota{type=\"limit\", resource=\"memory\", namespace=~\"$namespace\"}",
+          "format": "time_series",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "CPU Limit Quota Usage",
+      "type": "gauge"
     },
     {
       "collapsed": false,
@@ -848,7 +1435,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 26
       },
       "id": 21,
       "panels": [],
@@ -997,7 +1584,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 14
+        "y": 27
       },
       "id": 15,
       "links": [],
@@ -1022,7 +1609,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"}) by (pod)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"cpu\"}) by (pod)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1228,7 +1815,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 34
       },
       "id": 17,
       "links": [],
@@ -1256,7 +1843,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"cpu\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1271,7 +1858,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_request{kubernetes_namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_request{namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1286,7 +1873,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"}) by (container, pod, namespace) / sum(container_resource_request{kubernetes_namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"cpu\"}) by (container, pod, namespace) / sum(container_resource_request{namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1301,7 +1888,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_limit{kubernetes_namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_limit{namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1316,7 +1903,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"cpu\"}) by (container, pod, namespace) / sum(container_resource_limit{kubernetes_namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"cpu\"}) by (container, pod, namespace) / sum(container_resource_limit{namespace=~\"$namespace\",resource=\"cpu\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1379,7 +1966,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 28
+        "y": 41
       },
       "id": 34,
       "panels": [],
@@ -1443,7 +2030,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 42
       },
       "id": 23,
       "links": [],
@@ -1468,7 +2055,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", container!=\"\", resource=\"memory\"}) by (pod)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", container!=\"\", resource=\"memory\"}) by (pod)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -1719,7 +2306,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 36
+        "y": 49
       },
       "id": 25,
       "links": [],
@@ -1747,7 +2334,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"memory\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"memory\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1762,7 +2349,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_request{kubernetes_namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_request{namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -1778,7 +2365,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"memory\"}) by (container, pod, namespace) / sum(container_resource_request{kubernetes_namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"memory\"}) by (container, pod, namespace) / sum(container_resource_request{namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1793,7 +2380,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_limit{kubernetes_namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_limit{namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1808,7 +2395,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "exemplar": true,
-          "expr": "sum(container_resource_usage{kubernetes_namespace=~\"$namespace\", resource=\"memory\"}) by (container, pod, namespace) / sum(container_resource_limit{kubernetes_namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
+          "expr": "sum(container_resource_usage{namespace=~\"$namespace\", resource=\"memory\"}) by (container, pod, namespace) / sum(container_resource_limit{namespace=~\"$namespace\",resource=\"memory\"}) by (container, pod, namespace)",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -1881,7 +2468,7 @@
           "type": "prometheus",
           "uid": "PBFA97CFB590B2093"
         },
-        "definition": "label_values(container_resource_request, kubernetes_namespace)",
+        "definition": "label_values(container_resource_request, namespace)",
         "description": "namespace",
         "hide": 0,
         "includeAll": true,
@@ -1890,7 +2477,7 @@
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(container_resource_request, kubernetes_namespace)",
+          "query": "label_values(container_resource_request, namespace)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
