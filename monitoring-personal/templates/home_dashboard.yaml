@@ -1,0 +1,18 @@
+{{ $files := .Files }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-personal-dashboards-home
+  {{- if $.Values.namespace }}
+  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  namespace: {{ $.Release.Namespace }}
+  {{- end }}
+  labels:
+    {{- if $.Values.dashboardslabel }}
+    {{ $.Values.dashboardslabel }}: "1"
+    {{- end }}
+data:
+  home.json:
+{{ toYaml ( $files.Get "dashboards/Home.json" ) | indent 4}}
+

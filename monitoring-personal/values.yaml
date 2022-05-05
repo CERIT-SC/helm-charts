@@ -19,14 +19,7 @@ prometheus:
     enabled: false
   configmapReload:
     prometheus:
-      enabled: true
-      resources:
-        requests:
-          cpu: 10m
-          memory: 16Mi
-        limits:
-          cpu: 25m
-          memory: 32Mi
+      enabled: false
     alertmanager:
       enabled: false
   kubeStateMetrics:
@@ -103,20 +96,39 @@ prometheus:
               action: drop
 
 grafana:
-  sidecar:
-    resources:
-     requests:
-       cpu: 10m
-       memory: 64Mi
-     limits:
-       cpu: 25m
-       memory: 128Mi
-    dashboards:
-      enabled: true
-      label: grafana_dashboard
-    datasources:
-      enabled: true
-      label: grafana_datasource
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - access: proxy
+        basicAuth: false
+        isDefault: true
+        name: Prometheus
+        type: prometheus
+        url: "$PROMETHEUS_URL"
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  envValueFrom:
+    PROMETHEUS_URL:
+      secretKeyRef:
+        name: personal-monitoring-prometheus-url
+        key: url
+  extraConfigmapMounts:
+    - name: home-dashboard
+      mountPath: /var/lib/grafana/dashboards/default/home.json
+      subPath: home.json
+      configMap: monitoring-personal-dashboards-home
+      readOnly: true
   ingress:
     enabled: true
     annotations:
@@ -133,15 +145,15 @@ grafana:
   adminPassword: adminpassword
   resources:
     requests:
-      cpu: 50m
+      cpu: 20m
       memory: 64Mi
     limits:
-      cpu: 200m
+      cpu: 100m
       memory: 128Mi
 
   grafana.ini:
     dashboards:
-      default_home_dashboard_path: /tmp/dashboards/home.json
+      default_home_dashboard_path: /var/lib/grafana/dashboards/default/home.json
 
 dashboards:
   default:
@@ -156,8 +168,8 @@ stats:
     runAsGroup: 1000
   resources:
     requests:
-      cpu: 20m
+      cpu: 1m
       memory: 16Mi
     limits:
-      cpu: 80m
+      cpu: 20m
       memory: 64Mi

@@ -1,19 +1,6 @@
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
-  name: {{ template "monitoring-personal.fullname" $ }}-prometheus-datasource
-  labels:
-    type: prometheus
-    {{- if $.Values.dashboardslabel }}
-    {{ $.Values.datasourcelabel }}: "1"
-    {{- end }}
-data:
-  datasource.yaml: |-
-    apiVersion: 1
-    datasources:
-    - access: proxy
-      basicAuth: false
-      isDefault: true
-      name: Prometheus
-      type: prometheus
-      url: "http://{{- $.Release.Name }}-prometheus-{{- $.Values.prometheus.server.name }}.{{- $.Release.Namespace }}.svc.cluster.local"
+  name: personal-monitoring-prometheus-url
+stringData:
+  url: "http://{{- $.Release.Name }}-prometheus-{{- $.Values.prometheus.server.name }}.{{- $.Release.Namespace }}.svc.cluster.local"
