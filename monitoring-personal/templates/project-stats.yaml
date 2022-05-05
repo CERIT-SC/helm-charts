@@ -26,7 +26,7 @@ spec:
     {{- if $.Values.stats.image }}
     image: {{ $.Values.stats.image }}
     {{- else }}
-    image: cerit.io/project-stats:v0.05
+    image: cerit.io/project-stats:v0.06
     {{- end }}
     imagePullPolicy: Always
     resources:
