@@ -1422,7 +1422,7 @@
           "refId": "A"
         }
       ],
-      "title": "CPU Limit Quota Usage",
+      "title": "Memory Limit Quota Usage",
       "type": "gauge"
     },
     {

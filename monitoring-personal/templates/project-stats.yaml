@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: project-stats
+  name: {{ template "monitoring-personal.fullname" $ }}-project-stats
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/path: "/metrics"
@@ -29,6 +29,8 @@ spec:
     image: cerit.io/project-stats:v0.06
     {{- end }}
     imagePullPolicy: Always
+    ports:
+    - containerPort: 8080
     resources:
       requests:
         cpu: {{ $.Values.stats.resources.requests.cpu }}
@@ -36,3 +38,15 @@ spec:
       limits:
         cpu: {{ $.Values.stats.resources.limits.cpu }}
         memory: {{ $.Values.stats.resources.limits.memory }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-project-stats
+spec:
+  selector:
+    app: project-stats
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

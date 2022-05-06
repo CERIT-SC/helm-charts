@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Release.Name}}-{{.Values.prometheus.server.configMapOverrideName}}
+  namespace: {{.Release.Namespace}}
+data:
+  prometheus.yml: |
+    scrape_configs:
+    - job_name: prometheus
+      static_configs:
+      - targets:
+        - localhost:9090
+    - job_name: 'pod-stats'
+      static_configs:
+      - targets:
+        - {{ template "monitoring-personal.fullname" $ }}-project-stats.{{ .Release.Namespace }}.svc.cluster.local:8080
