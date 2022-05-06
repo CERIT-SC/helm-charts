@@ -100,8 +100,7 @@ prometheus:
 
 grafana:
   rbac:
-    create: true
-    namespaced: true
+    create: false
     pspEnabled: false
   serviceAccount:
     create: false
