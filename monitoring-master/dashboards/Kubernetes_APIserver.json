@@ -12,21 +12,42 @@
       }
     ]
   },
-  "editable": false,
+  "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 24,
-  "iteration": 1638263854842,
+  "id": 16,
+  "iteration": 1638263795368,
   "links": [],
   "panels": [
     {
+      "datasource": null,
+      "description": "The SLO (service level objective) and other metrics displayed on this dashboard are for informational purposes only.",
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "content": "The SLO (service level objective) and other metrics displayed on this dashboard are for informational purposes only.",
+        "mode": "markdown"
+      },
+      "pluginVersion": "8.0.3",
+      "span": 12,
+      "title": "Notice",
+      "type": "text"
+    },
+    {
       "cacheTimeout": null,
       "datasource": "$datasource",
+      "description": "How many percent of requests (both read and write) in 30 days have been answered successfully and fast enough?",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
+          "decimals": 3,
           "mappings": [
             {
               "options": {
@@ -51,17 +72,17 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "percentunit"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 7,
-        "w": 4,
+        "w": 8,
         "x": 0,
-        "y": 0
+        "y": 2
       },
-      "id": 2,
+      "id": 3,
       "interval": null,
       "links": [],
       "maxDataPoints": 100,
@@ -72,7 +93,7 @@
         "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
-            "min"
+            "mean"
           ],
           "fields": "",
           "values": false
@@ -84,7 +105,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(up{job=\"kube-proxy\",cluster=~\"$cluster\"})",
+          "expr": "apiserver_request:availability30d{verb=\"all\", cluster=~\"$cluster\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -92,7 +113,7 @@
           "refId": "A"
         }
       ],
-      "title": "Up",
+      "title": "Availability (30d) > 99.000%",
       "type": "stat"
     },
     {
@@ -101,16 +122,18 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "$datasource",
-      "fill": 1,
+      "decimals": 3,
+      "description": "How much error budget is left looking at our 0.990% availability guarantees?",
+      "fill": 10,
       "fillGradient": 0,
       "gridPos": {
         "h": 7,
-        "w": 10,
-        "x": 4,
-        "y": 0
+        "w": 16,
+        "x": 8,
+        "y": 2
       },
       "hiddenSeries": false,
-      "id": 3,
+      "id": 4,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -142,12 +165,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "exemplar": true,
-          "expr": "sum(rate(kubeproxy_sync_proxy_rules_duration_seconds_count{job=\"kube-proxy\", instance=~\"$instance\",cluster=~\"$cluster\"}[5m]))",
+          "expr": "100 * (apiserver_request:availability30d{verb=\"all\", cluster=~\"$cluster\"} - 0.990000)",
           "format": "time_series",
-          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "rate",
+          "legendFormat": "errorbudget",
           "refId": "A"
         }
       ],
@@ -155,7 +176,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Rules Sync Rate",
+      "title": "ErrorBudget (30d) > 99.000%",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -171,19 +192,210 @@
       },
       "yaxes": [
         {
-          "format": "ops",
+          "decimals": 3,
+          "format": "percentunit",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": 0,
+          "min": null,
           "show": true
         },
         {
-          "format": "ops",
+          "decimals": 3,
+          "format": "percentunit",
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": 0,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "$datasource",
+      "description": "How many percent of read requests (LIST,GET) in 30 days have been answered successfully and fast enough?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 9
+      },
+      "id": 5,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.3",
+      "targets": [
+        {
+          "expr": "apiserver_request:availability30d{verb=\"read\", cluster=~\"$cluster\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Read Availability (30d)",
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "description": "How many read requests (LIST,GET) per second do the apiservers get by code?",
+      "fill": 10,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 6,
+        "y": 9
+      },
+      "hiddenSeries": false,
+      "id": 6,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.0.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "seriesOverrides": [
+        {
+          "alias": "/2../i",
+          "color": "#56A64B"
+        },
+        {
+          "alias": "/3../i",
+          "color": "#F2CC0C"
+        },
+        {
+          "alias": "/4../i",
+          "color": "#3274D9"
+        },
+        {
+          "alias": "/5../i",
+          "color": "#E02F44"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (code) (code_resource:apiserver_request_total:rate5m{verb=\"read\", cluster=~\"$cluster\"})",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{ code }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Read SLI - Requests",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "reqps",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "reqps",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
           "show": true
         }
       ],
@@ -198,27 +410,28 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "$datasource",
+      "description": "How many percent of read requests (LIST,GET) per second are returned with errors (5xx)?",
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
         "h": 7,
-        "w": 10,
-        "x": 14,
-        "y": 0
+        "w": 6,
+        "x": 12,
+        "y": 9
       },
       "hiddenSeries": false,
-      "id": 4,
+      "id": 7,
       "legend": {
-        "alignAsTable": true,
+        "alignAsTable": false,
         "avg": false,
-        "current": true,
+        "current": false,
         "max": false,
         "min": false,
-        "rightSide": true,
+        "rightSide": false,
         "show": true,
         "sideWidth": null,
         "total": false,
-        "values": true
+        "values": false
       },
       "lines": true,
       "linewidth": 1,
@@ -239,12 +452,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.99,rate(kubeproxy_sync_proxy_rules_duration_seconds_bucket{job=\"kube-proxy\", instance=~\"$instance\",cluster=~\"$cluster\"}[5m]))",
+          "expr": "sum by (resource) (code_resource:apiserver_request_total:rate5m{verb=\"read\",code=~\"5..\", cluster=~\"$cluster\"}) / sum by (resource) (code_resource:apiserver_request_total:rate5m{verb=\"read\", cluster=~\"$cluster\"})",
           "format": "time_series",
-          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{instance}}",
+          "legendFormat": "{{ resource }}",
           "refId": "A"
         }
       ],
@@ -252,7 +463,103 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Rule Sync Latency 99th Quantile",
+      "title": "Read SLI - Errors",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": 0,
+          "show": true
+        },
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "description": "How many seconds is the 99th percentile for reading (LIST|GET) a given resource?",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 9
+      },
+      "hiddenSeries": false,
+      "id": 8,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.0.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{verb=\"read\", cluster=~\"$cluster\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{ resource }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Read SLI - Duration",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -272,7 +579,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": 0,
+          "min": null,
           "show": true
         },
         {
@@ -280,7 +587,388 @@
           "label": null,
           "logBase": 1,
           "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "cacheTimeout": null,
+      "datasource": "$datasource",
+      "description": "How many percent of write requests (POST|PUT|PATCH|DELETE) in 30 days have been answered successfully and fast enough?",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 3,
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 0,
+        "y": 16
+      },
+      "id": 9,
+      "interval": null,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "mean"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.3",
+      "targets": [
+        {
+          "expr": "apiserver_request:availability30d{verb=\"write\", cluster=~\"$cluster\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Write Availability (30d)",
+      "type": "stat"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "description": "How many write requests (POST|PUT|PATCH|DELETE) per second do the apiservers get by code?",
+      "fill": 10,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 6,
+        "y": 16
+      },
+      "hiddenSeries": false,
+      "id": 10,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.0.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "seriesOverrides": [
+        {
+          "alias": "/2../i",
+          "color": "#56A64B"
+        },
+        {
+          "alias": "/3../i",
+          "color": "#F2CC0C"
+        },
+        {
+          "alias": "/4../i",
+          "color": "#3274D9"
+        },
+        {
+          "alias": "/5../i",
+          "color": "#E02F44"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (code) (code_resource:apiserver_request_total:rate5m{verb=\"write\", cluster=~\"$cluster\"})",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{ code }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Write SLI - Requests",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "reqps",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "reqps",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "description": "How many percent of write requests (POST|PUT|PATCH|DELETE) per second are returned with errors (5xx)?",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 12,
+        "y": 16
+      },
+      "hiddenSeries": false,
+      "id": 11,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.0.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "sum by (resource) (code_resource:apiserver_request_total:rate5m{verb=\"write\",code=~\"5..\", cluster=~\"$cluster\"}) / sum by (resource) (code_resource:apiserver_request_total:rate5m{verb=\"write\", cluster=~\"$cluster\"})",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{ resource }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Write SLI - Errors",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
           "min": 0,
+          "show": true
+        },
+        {
+          "format": "percentunit",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "description": "How many seconds is the 99th percentile for writing (POST|PUT|PATCH|DELETE) a given resource?",
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 6,
+        "x": 18,
+        "y": 16
+      },
+      "hiddenSeries": false,
+      "id": 12,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "sideWidth": null,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.0.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "repeat": null,
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{verb=\"write\", cluster=~\"$cluster\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{ resource }}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Write SLI - Duration",
+      "tooltip": {
+        "shared": false,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "s",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "s",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
           "show": true
         }
       ],
@@ -301,10 +989,10 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 7
+        "y": 23
       },
       "hiddenSeries": false,
-      "id": 5,
+      "id": 13,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -312,7 +1000,7 @@
         "max": false,
         "min": false,
         "rightSide": false,
-        "show": true,
+        "show": false,
         "sideWidth": null,
         "total": false,
         "values": false
@@ -336,10 +1024,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(kubeproxy_network_programming_duration_seconds_count{job=\"kube-proxy\", instance=~\"$instance\",cluster=~\"$cluster\"}[5m]))",
+          "exemplar": true,
+          "expr": "sum(rate(workqueue_adds_total{job=\"kubernetes-apiservers\", instance=~\"$instance\", cluster=~\"$cluster\"}[5m])) by (instance, name)",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "rate",
+          "legendFormat": "{{instance}} {{name}}",
           "refId": "A"
         }
       ],
@@ -347,7 +1037,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Network Programming Rate",
+      "title": "Work Queue Add Rate",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -396,105 +1086,10 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 7
+        "y": 23
       },
       "hiddenSeries": false,
-      "id": 6,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": true,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "sideWidth": null,
-        "total": false,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.0.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(kubeproxy_network_programming_duration_seconds_bucket{job=\"kube-proxy\", instance=~\"$instance\",cluster=~\"$cluster\"}[5m])) by (instance, le))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{instance}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Network Programming Latency 99th Quantile",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": 0,
-          "show": true
-        },
-        {
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": 0,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "$datasource",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 0,
-        "y": 14
-      },
-      "hiddenSeries": false,
-      "id": 7,
+      "id": 14,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -502,7 +1097,7 @@
         "max": false,
         "min": false,
         "rightSide": false,
-        "show": true,
+        "show": false,
         "sideWidth": null,
         "total": false,
         "values": false
@@ -526,39 +1121,20 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(rest_client_requests_total{job=\"kube-proxy\", instance=~\"$instance\",code=~\"2..\",cluster=~\"$cluster\"}[5m]))",
+          "exemplar": true,
+          "expr": "sum(rate(workqueue_depth{job=\"kubernetes-apiservers\", instance=~\"$instance\", cluster=~\"$cluster\"}[5m])) by (instance, name)",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "2xx",
+          "legendFormat": "{{instance}} {{name}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum(rate(rest_client_requests_total{job=\"kube-proxy\", instance=~\"$instance\",code=~\"3..\",cluster=~\"$cluster\"}[5m]))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "3xx",
-          "refId": "B"
-        },
-        {
-          "expr": "sum(rate(rest_client_requests_total{job=\"kube-proxy\", instance=~\"$instance\",code=~\"4..\",cluster=~\"$cluster\"}[5m]))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "4xx",
-          "refId": "C"
-        },
-        {
-          "expr": "sum(rate(rest_client_requests_total{job=\"kube-proxy\", instance=~\"$instance\",code=~\"5..\",cluster=~\"$cluster\"}[5m]))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "5xx",
-          "refId": "D"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Kube API Request Rate",
+      "title": "Work Queue Depth",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -574,102 +1150,7 @@
       },
       "yaxes": [
         {
-          "format": "ops",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "ops",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "$datasource",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 16,
-        "x": 8,
-        "y": 14
-      },
-      "hiddenSeries": false,
-      "id": 8,
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": false,
-        "show": true,
-        "sideWidth": null,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.0.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "repeat": null,
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_duration_seconds_bucket{job=\"kube-proxy\",instance=~\"$instance\",verb=\"POST\",cluster=~\"$cluster\"}[5m])) by (verb, url, le))",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{verb}} {{url}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Post Request Latency 99th Quantile",
-      "tooltip": {
-        "shared": false,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "s",
+          "format": "short",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -677,7 +1158,7 @@
           "show": true
         },
         {
-          "format": "s",
+          "format": "short",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -702,10 +1183,10 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 30
       },
       "hiddenSeries": false,
-      "id": 9,
+      "id": 15,
       "legend": {
         "alignAsTable": true,
         "avg": false,
@@ -737,10 +1218,12 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_duration_seconds_bucket{job=\"kube-proxy\", instance=~\"$instance\", verb=\"GET\",cluster=~\"$cluster\"}[5m])) by (verb, url, le))",
+          "exemplar": true,
+          "expr": "histogram_quantile(0.99, sum(rate(workqueue_queue_duration_seconds_bucket{job=\"kubernetes-apiservers\", instance=~\"$instance\", cluster=~\"$cluster\"}[5m])) by (instance, name, le))",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{verb}} {{url}}",
+          "legendFormat": "{{instance}} {{name}}",
           "refId": "A"
         }
       ],
@@ -748,7 +1231,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Get Request Latency 99th Quantile",
+      "title": "Work Queue Latency",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -768,7 +1251,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": 0,
+          "min": null,
           "show": true
         },
         {
@@ -776,7 +1259,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": 0,
+          "min": null,
           "show": true
         }
       ],
@@ -797,10 +1280,10 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 28
+        "y": 37
       },
       "hiddenSeries": false,
-      "id": 10,
+      "id": 16,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -832,8 +1315,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "process_resident_memory_bytes{job=\"kube-proxy\",instance=~\"$instance\",cluster=~\"$cluster\"}",
+          "exemplar": true,
+          "expr": "process_resident_memory_bytes{job=\"kubernetes-apiservers\",instance=~\"$instance\", cluster=~\"$cluster\"}",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
           "refId": "A"
@@ -892,10 +1377,10 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 28
+        "y": 37
       },
       "hiddenSeries": false,
-      "id": 11,
+      "id": 17,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -927,8 +1412,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "rate(process_cpu_seconds_total{job=\"kube-proxy\",instance=~\"$instance\",cluster=~\"$cluster\"}[5m])",
+          "exemplar": true,
+          "expr": "rate(process_cpu_seconds_total{job=\"kubernetes-apiservers\",instance=~\"$instance\", cluster=~\"$cluster\"}[5m])",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
           "refId": "A"
@@ -987,10 +1474,10 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 28
+        "y": 37
       },
       "hiddenSeries": false,
-      "id": 12,
+      "id": 18,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -1022,8 +1509,10 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "go_goroutines{job=\"kube-proxy\",instance=~\"$instance\",cluster=~\"$cluster\"}",
+          "exemplar": true,
+          "expr": "go_goroutines{job=\"kubernetes-apiservers\",instance=~\"$instance\", cluster=~\"$cluster\"}",
           "format": "time_series",
+          "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
           "refId": "A"
@@ -1103,22 +1592,22 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "All",
-          "value": "$__all"
+          "text": "kuba",
+          "value": "kuba"
         },
         "datasource": "$datasource",
-        "definition": "",
+        "definition": "label_values(cluster)",
         "description": null,
         "error": null,
         "hide": 0,
-        "includeAll": true,
-        "label": null,
+        "includeAll": false,
+        "label": "cluster",
         "multi": false,
-        "name": "instance",
+        "name": "cluster",
         "options": [],
         "query": {
-          "query": "label_values(kubeproxy_network_programming_duration_seconds_bucket{job=\"kube-proxy\",cluster=~\"$cluster\"}, instance)",
-          "refId": "Prometheus-instance-Variable-Query"
+          "query": "label_values(cluster)",
+          "refId": "StandardVariableQuery"
         },
         "refresh": 2,
         "regex": "",
@@ -1136,25 +1625,28 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": null,
-        "definition": "label_values(cluster)",
-        "description": "cluster",
+        "datasource": "$datasource",
+        "definition": "",
+        "description": null,
         "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": "cluster",
+        "label": null,
         "multi": false,
-        "name": "cluster",
+        "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(cluster)",
-          "refId": "StandardVariableQuery"
+          "query": "label_values(apiserver_request_total{job=\"apiserver\", cluster=~\"$cluster\"}, instance)",
+          "refId": "Prometheus-instance-Variable-Query"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
@@ -1188,7 +1680,7 @@
     ]
   },
   "timezone": "UTC",
-  "title": "Kubernetes / Proxy",
-  "uid": "wDLhdNS7z",
-  "version": 6
+  "title": "Kubernetes / API server",
+  "uid": "JFvvDHSnk",
+  "version": 5
 }

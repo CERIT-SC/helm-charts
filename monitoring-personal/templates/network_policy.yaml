@@ -1,0 +1,55 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-prometheus-network-policy
+  {{- if $.Values.namespace }}
+  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  namespace: {{ $.Release.Namespace }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      app: prometheus
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- if $.Values.namespace }}
+              kubernetes.io/metadata.name: {{ $.Values.namespace }}
+              {{- else }}
+              kubernetes.io/metadata.name: {{ $.Release.Namespace }}
+              {{- end }}
+      ports:
+        - protocol: TCP
+          port: 9090
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-stats-network-policy
+  {{- if $.Values.namespace }}
+  namespace: {{ $.Values.namespace }}
+  {{- else }}
+  namespace: {{ $.Release.Namespace }}
+  {{- end }}
+spec:
+  podSelector:
+    matchLabels:
+      app: project-stats
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              {{- if $.Values.namespace }}
+              kubernetes.io/metadata.name: {{ $.Values.namespace }}
+              {{- else }}
+              kubernetes.io/metadata.name: {{ $.Release.Namespace }}
+              {{- end }}
+      ports:
+        - protocol: TCP
+          port: 8080

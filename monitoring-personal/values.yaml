@@ -1,0 +1,183 @@
+deployment:
+  name: monitoring-personal
+  replicas: 1
+
+name: monitoring-personal
+
+prometheus:
+  rbac:
+    create: false
+  serviceAccounts:
+    alertmanager:
+      create: false
+    nodeExporter:
+      create: false
+    pushgateway:
+      create: false
+    server:
+      create: true
+
+  alertmanager:
+    enabled: false
+  configmapReload:
+    prometheus:
+      enabled: false
+    alertmanager:
+      enabled: false
+  kubeStateMetrics:
+    enabled: false
+  nodeExporter:
+    enabled: false
+  server:
+    configMapOverrideName: prometheus-config
+    livenessProbeInitialDelay: 60
+    livenessProbeTimeout: 60
+    readinessProbeInitialDelay: 60
+    readinessProbeTimeout: 60
+    tcpSocketProbeEnabled: true
+    strategy:
+      type: Recreate
+    enabled: true
+    retention: 14d
+    name: prometheus
+    global:
+      scrape_interval: 1m
+      scrape_timeout: 30s
+      evaluation_interval: 1m
+    ingress:
+      enabled: false
+    persistentVolume:
+      enabled: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
+  pushgateway:
+    enabled: false
+  serverFiles:
+    prometheus.yml:
+      scrape_configs:
+        - job_name: prometheus
+          static_configs:
+            - targets:
+              - localhost:9090
+        - job_name: 'pod-stats'
+  
+          kubernetes_sd_configs:
+            - role: pod
+  
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+              action: replace
+              regex: (https?)
+              target_label: __scheme__
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+              action: replace
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              replacement: $1:$2
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: kubernetes_namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: kubernetes_pod_name
+            - source_labels: [__meta_kubernetes_pod_phase]
+              regex: Pending|Succeeded|Failed
+              action: drop
+
+grafana:
+  rbac:
+    create: false
+    pspEnabled: false
+  serviceAccount:
+    create: false
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+      - access: proxy
+        basicAuth: false
+        isDefault: true
+        name: Prometheus
+        type: prometheus
+        url: "$PROMETHEUS_URL"
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  envValueFrom:
+    PROMETHEUS_URL:
+      secretKeyRef:
+        name: personal-monitoring-prometheus-url
+        key: url
+  extraConfigmapMounts:
+    - name: home-dashboard
+      mountPath: /var/lib/grafana/dashboards/default/home.json
+      subPath: home.json
+      configMap: monitoring-personal-dashboards-home
+      readOnly: true
+  ingress:
+    enabled: true
+    annotations:
+        kuberentes.io/ingress.class: "nginx"
+        kubernetes.io/tls-acme: "true"
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - "grafana-address"
+    tls:
+      - secretName: grafana-address-tls
+        hosts:
+          - "grafana-address"
+  adminUser: adminuser
+  adminPassword: adminpassword
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+  grafana.ini:
+    dashboards:
+      default_home_dashboard_path: /var/lib/grafana/dashboards/default/home.json
+
+dashboards:
+  default:
+    home:
+      file: "dashboards/Home.json"
+dashboardslabel: "grafana_dashboard"
+datasourcelabel: "grafana_datasource"
+stats:
+  image: cerit.io/project-stats:v0.06
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+  resources:
+    requests:
+      cpu: 1m
+      memory: 16Mi
+    limits:
+      cpu: 20m
+      memory: 64Mi

@@ -12,7 +12,7 @@
       }
     ]
   },
-  "editable": false,
+  "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
   "id": 58,
@@ -101,7 +101,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_cpu_usage:irate:5m:schedulable{mode=\"utilized\",cluster=~\"$cluster\",unit=\"percentage\"}",
+          "expr": "cluster_cpu_usage:irate:5m{mode=\"utilized\",cluster=~\"$cluster\",unit=\"percentage\"}",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 1,
@@ -183,7 +183,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_memory_usage:schedulable{mode=\"utilized\",cluster=~\"$cluster\",unit=\"percentage\"}",
+          "expr": "cluster_memory_usage{mode=\"utilized\",cluster=~\"$cluster\",unit=\"percentage\"}",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 1,
@@ -266,7 +266,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_disk_usage:schedulable{mode=\"utilized\",cluster=~\"$cluster\",unit=\"percentage\"}",
+          "expr": "cluster_disk_usage{mode=\"utilized\",cluster=~\"$cluster\",unit=\"percentage\"}",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 1,
@@ -345,7 +345,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_cpu_usage:irate:5m:schedulable{cluster=~\"$cluster\",mode=\"utilized\",unit=\"core\"}",
+          "expr": "cluster_cpu_usage:irate:5m{cluster=~\"$cluster\",mode=\"utilized\",unit=\"core\"}",
           "format": "time_series",
           "interval": "10s",
           "intervalFactor": 1,
@@ -423,7 +423,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_cpu_total:schedulable{cluster=~\"$cluster\",unit=\"core\"}",
+          "expr": "cluster_cpu_total{cluster=~\"$cluster\",unit=\"core\"}",
           "interval": "10s",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -500,7 +500,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_memory_usage:schedulable{cluster=~\"$cluster\",mode=\"utilized\",unit=\"byte\"}",
+          "expr": "cluster_memory_usage{cluster=~\"$cluster\",mode=\"utilized\",unit=\"byte\"}",
           "interval": "10s",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -577,7 +577,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_memory_total:schedulable{cluster=~\"$cluster\",unit=\"byte\"}",
+          "expr": "cluster_memory_total{cluster=~\"$cluster\",unit=\"byte\"}",
           "interval": "10s",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -654,7 +654,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_disk_usage:schedulable{cluster=~\"$cluster\",mode=\"utilized\",unit=\"byte\"}",
+          "expr": "cluster_disk_usage{cluster=~\"$cluster\",mode=\"utilized\",unit=\"byte\"}",
           "interval": "10s",
           "intervalFactor": 1,
           "legendFormat": "USED",
@@ -731,7 +731,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_disk_total:schedulable{cluster=~\"$cluster\",unit=\"byte\"}",
+          "expr": "cluster_disk_total{cluster=~\"$cluster\",unit=\"byte\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "join-less",
@@ -819,7 +819,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_cpu_usage:irate:5m:schedulable{cluster=~\"$cluster\",unit=\"percentage\",mode=\"utilized\"}",
+          "expr": "cluster_cpu_usage:irate:5m{cluster=~\"$cluster\",unit=\"percentage\",mode=\"utilized\"}",
           "format": "time_series",
           "hide": true,
           "instant": false,
@@ -922,7 +922,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_memory_usage:schedulable{cluster=~\"$cluster\", unit=\"percentage\", mode=\"utilized\"}",
+          "expr": "cluster_memory_usage{cluster=~\"$cluster\", unit=\"percentage\", mode=\"utilized\"}",
           "format": "time_series",
           "hide": true,
           "instant": false,
@@ -1025,7 +1025,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_disk_usage:schedulable{cluster=~\"$cluster\", unit=\"percentage\", mode=\"utilized\"}",
+          "expr": "cluster_disk_usage{cluster=~\"$cluster\", unit=\"percentage\", mode=\"utilized\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "Cluster",
@@ -1119,7 +1119,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_cpu_usage:irate:5m:schedulable{cluster=~\"$cluster\",unit=\"core\",mode=\"utilized\"}",
+          "expr": "cluster_cpu_usage:irate:5m{cluster=~\"$cluster\",unit=\"core\",mode=\"utilized\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "Cluster",
@@ -1215,7 +1215,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_memory_usage:schedulable{cluster=~\"$cluster\", unit=\"byte\", mode=\"utilized\"}",
+          "expr": "cluster_memory_usage{cluster=~\"$cluster\", unit=\"byte\", mode=\"utilized\"}",
           "format": "time_series",
           "hide": true,
           "instant": false,
@@ -1318,7 +1318,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "cluster_disk_usage:schedulable{cluster=~\"$cluster\", unit=\"byte\", mode=\"utilized\"}",
+          "expr": "cluster_disk_usage{cluster=~\"$cluster\", unit=\"byte\", mode=\"utilized\"}",
           "hide": true,
           "interval": "",
           "legendFormat": "Cluster",
@@ -1348,8 +1348,8 @@
         "allValue": ".*",
         "current": {
           "selected": false,
-          "text": "hdha",
-          "value": "hdha"
+          "text": "kuba",
+          "value": "kuba"
         },
         "datasource": null,
         "definition": "label_values(cluster)",

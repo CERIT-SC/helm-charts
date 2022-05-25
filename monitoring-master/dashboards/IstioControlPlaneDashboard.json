@@ -13,7 +13,7 @@
     ]
   },
   "description": "Istio Control Plane Dashboard version 1.9.6",
-  "editable": false,
+  "editable": true,
   "gnetId": 7645,
   "graphTooltip": 1,
   "id": 11,

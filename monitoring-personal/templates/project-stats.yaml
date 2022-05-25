@@ -1,0 +1,52 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-project-stats
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/metrics"
+    prometheus.io/port: "8080"
+  labels:
+    app: project-stats
+spec:
+  securityContext:
+    {{- if $.Values.stats.securityContext.runAsUser }}
+    runAsUser: {{ $.Values.stats.securityContext.runAsUser }}
+    {{- else }}
+    runAsUser: 1000
+    {{- end }}
+    {{- if $.Values.stats.securityContext.runAsUser }}
+    runAsGroup: {{ $.Values.stats.securityContext.runAsUser }}
+    {{- else }}
+    runAsGroup: 1000
+    {{- end }}
+  containers:
+  - name: project-stats
+    {{- if $.Values.stats.image }}
+    image: {{ $.Values.stats.image }}
+    {{- else }}
+    image: cerit.io/project-stats:v0.06
+    {{- end }}
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 8080
+    resources:
+      requests:
+        cpu: {{ $.Values.stats.resources.requests.cpu }}
+        memory: {{ $.Values.stats.resources.requests.memory }}
+      limits:
+        cpu: {{ $.Values.stats.resources.limits.cpu }}
+        memory: {{ $.Values.stats.resources.limits.memory }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "monitoring-personal.fullname" $ }}-project-stats
+spec:
+  selector:
+    app: project-stats
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

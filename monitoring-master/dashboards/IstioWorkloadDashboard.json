@@ -12,12 +12,12 @@
       }
     ]
   },
-  "description": "Istio Service Dashboard version 1.9.6",
-  "editable": false,
-  "gnetId": 7636,
+  "description": "Istio Workload Dashboard version 1.9.6",
+  "editable": true,
+  "gnetId": 7630,
   "graphTooltip": 0,
-  "id": 14,
-  "iteration": 1638263760932,
+  "id": 15,
+  "iteration": 1638263780688,
   "links": [],
   "panels": [
     {
@@ -29,7 +29,7 @@
         "x": 0,
         "y": 0
       },
-      "id": 106,
+      "id": 95,
       "panels": [],
       "title": "General",
       "type": "row"
@@ -45,7 +45,7 @@
       "id": 89,
       "links": [],
       "options": {
-        "content": "<div class=\"dashboard-header text-center\">\n<span>SERVICE: $service</span>\n</div>",
+        "content": "<div class=\"dashboard-header text-center\">\n<span>WORKLOAD: $workload.$namespace</span>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "8.0.3",
@@ -91,7 +91,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 8,
         "x": 0,
         "y": 4
       },
@@ -117,14 +117,14 @@
       "pluginVersion": "8.0.3",
       "targets": [
         {
-          "expr": "round(sum(irate(istio_requests_total{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])), 0.001)",
+          "expr": "round(sum(irate(istio_requests_total{reporter=\"$qrep\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\",cluster=~\"$cluster\"}[5m])), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A",
           "step": 4
         }
       ],
-      "title": "Client Request Volume",
+      "title": "Incoming Request Volume",
       "type": "stat"
     },
     {
@@ -170,8 +170,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 6,
+        "w": 8,
+        "x": 8,
         "y": 4
       },
       "id": 14,
@@ -196,13 +196,13 @@
       "pluginVersion": "8.0.3",
       "targets": [
         {
-          "expr": "sum(irate(istio_requests_total{reporter=\"$qrep\",destination_service=~\"$service\",response_code!~\"5.*\",cluster=~\"$cluster\"}[5m])) / sum(irate(istio_requests_total{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m]))",
+          "expr": "sum(irate(istio_requests_total{reporter=\"$qrep\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\",response_code!~\"5.*\",cluster=~\"$cluster\"}[5m])) / sum(irate(istio_requests_total{reporter=\"$qrep\",destination_workload_namespace=~\"$namespace\",destination_workload=~\"$workload\",cluster=~\"$cluster\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
         }
       ],
-      "title": "Client Success Rate (non-5xx responses)",
+      "title": "Incoming Success Rate (non-5xx responses)",
       "type": "stat"
     },
     {
@@ -215,8 +215,8 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 12,
+        "w": 8,
+        "x": 16,
         "y": 4
       },
       "hiddenSeries": false,
@@ -252,7 +252,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le))",
+          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\",destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\",destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\",cluster=~\"$cluster\"}[5m])) by (le))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -260,7 +260,7 @@
           "refId": "A"
         },
         {
-          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le))",
+          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\",destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\",destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\",cluster=~\"$cluster\"}[5m])) by (le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -268,7 +268,7 @@
           "refId": "B"
         },
         {
-          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le))",
+          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\",destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\",destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\",cluster=~\"$cluster\"}[5m])) by (le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -280,7 +280,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Client Request Duration",
+      "title": "Request Duration",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -356,9 +356,9 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
-        "y": 4
+        "w": 12,
+        "x": 0,
+        "y": 8
       },
       "id": 84,
       "interval": null,
@@ -382,7 +382,7 @@
       "pluginVersion": "8.0.3",
       "targets": [
         {
-          "expr": "sum(irate(istio_tcp_received_bytes_total{reporter=\"$qrep\", destination_service=~\"$service\",cluster=~\"$cluster\"}[5m]))",
+          "expr": "sum(irate(istio_tcp_sent_bytes_total{reporter=\"$qrep\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\",cluster=~\"$cluster\"}[5m])) + sum(irate(istio_tcp_received_bytes_total{reporter=\"$qrep\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\",cluster=~\"$cluster\"}[5m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -390,273 +390,8 @@
           "refId": "A"
         }
       ],
-      "title": "TCP Received Bytes",
+      "title": "TCP Server Traffic",
       "type": "stat"
-    },
-    {
-      "cacheTimeout": null,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "rgb(31, 120, 193)",
-            "mode": "fixed"
-          },
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "ops"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 0,
-        "y": 8
-      },
-      "id": 97,
-      "interval": null,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "none",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.3",
-      "targets": [
-        {
-          "expr": "round(sum(irate(istio_requests_total{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])), 0.001)",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A",
-          "step": 4
-        }
-      ],
-      "title": "Server Request Volume",
-      "type": "stat"
-    },
-    {
-      "cacheTimeout": null,
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "fixedColor": "rgb(31, 120, 193)",
-            "mode": "fixed"
-          },
-          "mappings": [
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "N/A"
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "rgba(50, 172, 45, 0.97)",
-                "value": null
-              },
-              {
-                "color": "rgba(237, 129, 40, 0.89)",
-                "value": 95
-              },
-              {
-                "color": "rgba(245, 54, 54, 0.9)",
-                "value": 99
-              }
-            ]
-          },
-          "unit": "percentunit"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 6,
-        "y": 8
-      },
-      "id": 98,
-      "interval": null,
-      "links": [],
-      "maxDataPoints": 100,
-      "options": {
-        "colorMode": "none",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "mean"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "8.0.3",
-      "targets": [
-        {
-          "expr": "sum(irate(istio_requests_total{reporter=\"destination\",destination_service=~\"$service\",response_code!~\"5.*\",cluster=~\"$cluster\"}[5m])) / sum(irate(istio_requests_total{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m]))",
-          "format": "time_series",
-          "intervalFactor": 1,
-          "refId": "A"
-        }
-      ],
-      "title": "Server Success Rate (non-5xx responses)",
-      "type": "stat"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "Prometheus",
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
-        "y": 8
-      },
-      "hiddenSeries": false,
-      "id": 99,
-      "legend": {
-        "alignAsTable": false,
-        "avg": false,
-        "current": false,
-        "hideEmpty": false,
-        "hideZero": false,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.0.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le))",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "P50",
-          "refId": "A"
-        },
-        {
-          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le))",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "P90",
-          "refId": "B"
-        },
-        {
-          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service=~\"$service\",cluster=~\"$cluster\"}[5m])) by (le))",
-          "format": "time_series",
-          "hide": false,
-          "intervalFactor": 1,
-          "legendFormat": "P99",
-          "refId": "C"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Server Request Duration",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": false
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
     },
     {
       "cacheTimeout": null,
@@ -697,11 +432,11 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
-        "x": 18,
+        "w": 12,
+        "x": 12,
         "y": 8
       },
-      "id": 100,
+      "id": 85,
       "interval": null,
       "links": [],
       "maxDataPoints": 100,
@@ -723,7 +458,7 @@
       "pluginVersion": "8.0.3",
       "targets": [
         {
-          "expr": "sum(irate(istio_tcp_sent_bytes_total{reporter=\"$qrep\", destination_service=~\"$service\",cluster=~\"$cluster\"}[5m]))",
+          "expr": "sum(irate(istio_tcp_sent_bytes_total{reporter=\"$qrep\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\",cluster=~\"$cluster\"}[5m])) + sum(irate(istio_tcp_received_bytes_total{reporter=\"$qrep\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\",cluster=~\"$cluster\"}[5m]))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -731,7 +466,7 @@
           "refId": "A"
         }
       ],
-      "title": "TCP Sent Bytes",
+      "title": "TCP Client Traffic",
       "type": "stat"
     },
     {
@@ -743,9 +478,9 @@
         "x": 0,
         "y": 12
       },
-      "id": 104,
+      "id": 93,
       "panels": [],
-      "title": "Client Workloads",
+      "title": "Inbound Workloads",
       "type": "row"
     },
     {
@@ -759,7 +494,7 @@
       "id": 45,
       "links": [],
       "options": {
-        "content": "<div class=\"dashboard-header text-center\">\n<span>CLIENT WORKLOADS</span>\n</div>",
+        "content": "<div class=\"dashboard-header text-center\">\n<span>INBOUND WORKLOADS</span>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "8.0.3",
@@ -810,7 +545,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "round(sum(irate(istio_requests_total{connection_security_policy=\"mutual_tls\",destination_service=~\"$service\",reporter=\"$qrep\",source_workload=~\"$srcwl\",source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
+          "expr": "round(sum(irate(istio_requests_total{connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", reporter=\"$qrep\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ source_workload }}.{{ source_workload_namespace }} : {{ response_code }} (🔐mTLS)",
@@ -818,7 +553,7 @@
           "step": 2
         },
         {
-          "expr": "round(sum(irate(istio_requests_total{connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", reporter=\"$qrep\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
+          "expr": "round(sum(irate(istio_requests_total{connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", reporter=\"$qrep\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, response_code), 0.001)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -915,7 +650,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\",response_code!~\"5.*\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace) / sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace)",
+          "expr": "sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\",response_code!~\"5.*\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace) / sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -924,7 +659,7 @@
           "step": 2
         },
         {
-          "expr": "sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\",response_code!~\"5.*\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace) / sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace)",
+          "expr": "sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\",response_code!~\"5.*\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace) / sum(irate(istio_requests_total{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1022,7 +757,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1031,7 +766,7 @@
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1040,7 +775,7 @@
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1049,7 +784,7 @@
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1058,7 +793,7 @@
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1067,7 +802,7 @@
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1076,7 +811,7 @@
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1085,7 +820,7 @@
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1181,7 +916,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1190,7 +925,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1199,7 +934,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1208,7 +943,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1217,7 +952,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1226,7 +961,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1235,7 +970,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1244,7 +979,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1340,7 +1075,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1349,7 +1084,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1358,7 +1093,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1367,7 +1102,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1376,7 +1111,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1385,7 +1120,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1394,7 +1129,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1403,7 +1138,7 @@
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload=~\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1496,7 +1231,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"$qrep\", connection_security_policy=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1505,7 +1240,7 @@
           "step": 2
         },
         {
-          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"$qrep\", connection_security_policy!=\"mutual_tls\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ source_workload }}.{{ source_workload_namespace}}",
@@ -1597,7 +1332,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy=\"mutual_tls\", reporter=\"$qrep\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy=\"mutual_tls\", reporter=\"$qrep\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ source_workload }}.{{ source_workload_namespace}} (🔐mTLS)",
@@ -1605,7 +1340,7 @@
           "step": 2
         },
         {
-          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy!=\"mutual_tls\", reporter=\"$qrep\", destination_service=~\"$service\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy!=\"mutual_tls\", reporter=\"$qrep\", destination_workload_namespace=~\"$namespace\", destination_workload=~\"$workload\", source_workload=~\"$srcwl\", source_workload_namespace=~\"$srcns\",cluster=~\"$cluster\"}[5m])) by (source_workload, source_workload_namespace), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ source_workload }}.{{ source_workload_namespace}}",
@@ -1663,9 +1398,9 @@
         "x": 0,
         "y": 34
       },
-      "id": 102,
+      "id": 91,
       "panels": [],
-      "title": "Service Workloads",
+      "title": "Outbound Services",
       "type": "row"
     },
     {
@@ -1679,7 +1414,7 @@
       "id": 69,
       "links": [],
       "options": {
-        "content": "<div class=\"dashboard-header text-center\">\n<span>SERVICE WORKLOADS</span>\n</div>",
+        "content": "<div class=\"dashboard-header text-center\">\n<span>OUTBOUND SERVICES</span>\n</div>",
         "mode": "html"
       },
       "pluginVersion": "8.0.3",
@@ -1701,7 +1436,7 @@
         "y": 38
       },
       "hiddenSeries": false,
-      "id": 90,
+      "id": 70,
       "legend": {
         "avg": false,
         "current": false,
@@ -1730,19 +1465,19 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "round(sum(irate(istio_requests_total{connection_security_policy=\"mutual_tls\",destination_service=~\"$service\",reporter=\"destination\",destination_workload=~\"$dstwl\",destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, response_code), 0.001)",
+          "expr": "round(sum(irate(istio_requests_total{connection_security_policy=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", reporter=\"source\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, response_code), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} : {{ response_code }} (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} : {{ response_code }} (🔐mTLS)",
           "refId": "A",
           "step": 2
         },
         {
-          "expr": "round(sum(irate(istio_requests_total{connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", reporter=\"destination\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, response_code), 0.001)",
+          "expr": "round(sum(irate(istio_requests_total{connection_security_policy!=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", reporter=\"source\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, response_code), 0.001)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} : {{ response_code }}",
+          "legendFormat": "{{ destination_service }} : {{ response_code }}",
           "refId": "B",
           "step": 2
         }
@@ -1751,7 +1486,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Incoming Requests By Destination Workload And Response Code",
+      "title": "Outgoing Requests By Destination And Response Code",
       "tooltip": {
         "shared": false,
         "sort": 0,
@@ -1805,7 +1540,7 @@
         "y": 38
       },
       "hiddenSeries": false,
-      "id": 91,
+      "id": 71,
       "legend": {
         "avg": false,
         "current": false,
@@ -1835,20 +1570,20 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(irate(istio_requests_total{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\",response_code!~\"5.*\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace) / sum(irate(istio_requests_total{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace)",
+          "expr": "sum(irate(istio_requests_total{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\",response_code!~\"5.*\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service) / sum(irate(istio_requests_total{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} (🔐mTLS)",
           "refId": "A",
           "step": 2
         },
         {
-          "expr": "sum(irate(istio_requests_total{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\",response_code!~\"5.*\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace) / sum(irate(istio_requests_total{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace)",
+          "expr": "sum(irate(istio_requests_total{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\",response_code!~\"5.*\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service) / sum(irate(istio_requests_total{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service)",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}",
+          "legendFormat": "{{ destination_service }}",
           "refId": "B",
           "step": 2
         }
@@ -1857,7 +1592,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Incoming Success Rate (non-5xx responses) By Destination Workload",
+      "title": "Outgoing Success Rate (non-5xx responses) By Destination",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1910,7 +1645,7 @@
         "y": 44
       },
       "hiddenSeries": false,
-      "id": 94,
+      "id": 72,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -1942,74 +1677,74 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P50 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P50 (🔐mTLS)",
           "refId": "A",
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P90 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P90 (🔐mTLS)",
           "refId": "B",
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P95 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P95 (🔐mTLS)",
           "refId": "C",
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P99 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P99 (🔐mTLS)",
           "refId": "D",
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.50, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P50",
+          "legendFormat": "{{ destination_service }} P50",
           "refId": "E",
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.90, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P90",
+          "legendFormat": "{{ destination_service }} P90",
           "refId": "F",
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.95, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.95, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P95",
+          "legendFormat": "{{ destination_service }} P95",
           "refId": "G",
           "step": 2
         },
         {
-          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "(histogram_quantile(0.99, sum(irate(istio_request_duration_milliseconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le)) / 1000) or histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P99",
+          "legendFormat": "{{ destination_service }} P99",
           "refId": "H",
           "step": 2
         }
@@ -2018,7 +1753,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Incoming Request Duration By Service Workload",
+      "title": "Outgoing Request Duration By Destination",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2070,7 +1805,7 @@
         "y": 44
       },
       "hiddenSeries": false,
-      "id": 95,
+      "id": 73,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -2101,74 +1836,74 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P50 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P50 (🔐mTLS)",
           "refId": "A",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}  P90 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P90 (🔐mTLS)",
           "refId": "B",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P95 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P95 (🔐mTLS)",
           "refId": "C",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}  P99 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P99 (🔐mTLS)",
           "refId": "D",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P50",
+          "legendFormat": "{{ destination_service }} P50",
           "refId": "E",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P90",
+          "legendFormat": "{{ destination_service }} P90",
           "refId": "F",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P95",
+          "legendFormat": "{{ destination_service }} P95",
           "refId": "G",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_request_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P99",
+          "legendFormat": "{{ destination_service }} P99",
           "refId": "H",
           "step": 2
         }
@@ -2177,7 +1912,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Incoming Request Size By Service Workload",
+      "title": "Outgoing Request Size By Destination",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2229,7 +1964,7 @@
         "y": 44
       },
       "hiddenSeries": false,
-      "id": 96,
+      "id": 74,
       "legend": {
         "alignAsTable": false,
         "avg": false,
@@ -2260,74 +1995,74 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P50 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P50 (🔐mTLS)",
           "refId": "A",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}  P90 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P90 (🔐mTLS)",
           "refId": "B",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P95 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} P95 (🔐mTLS)",
           "refId": "C",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }}  P99 (🔐mTLS)",
+          "legendFormat": "{{ destination_service }}  P99 (🔐mTLS)",
           "refId": "D",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.50, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P50",
+          "legendFormat": "{{ destination_service }} P50",
           "refId": "E",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.90, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P90",
+          "legendFormat": "{{ destination_service }} P90",
           "refId": "F",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.95, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P95",
+          "legendFormat": "{{ destination_service }} P95",
           "refId": "G",
           "step": 2
         },
         {
-          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace, le))",
+          "expr": "histogram_quantile(0.99, sum(irate(istio_response_bytes_bucket{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service, le))",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace }} P99",
+          "legendFormat": "{{ destination_service }} P99",
           "refId": "H",
           "step": 2
         }
@@ -2336,7 +2071,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Response Size By Service Workload",
+      "title": "Response Size By Destination",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2388,7 +2123,7 @@
         "y": 50
       },
       "hiddenSeries": false,
-      "id": 92,
+      "id": 76,
       "legend": {
         "avg": false,
         "current": false,
@@ -2416,19 +2151,18 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"destination\", connection_security_policy=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy=\"mutual_tls\", reporter=\"source\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service), 0.001)",
           "format": "time_series",
-          "hide": false,
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace}} (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} (🔐mTLS)",
           "refId": "A",
           "step": 2
         },
         {
-          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"destination\", connection_security_policy!=\"mutual_tls\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy!=\"mutual_tls\", reporter=\"source\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{ destination_workload_namespace}}",
+          "legendFormat": "{{ destination_service }}",
           "refId": "B",
           "step": 2
         }
@@ -2437,7 +2171,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Bytes Received from Incoming TCP Connection",
+      "title": "Bytes Sent on Outgoing TCP Connection",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2489,7 +2223,7 @@
         "y": 50
       },
       "hiddenSeries": false,
-      "id": 93,
+      "id": 78,
       "legend": {
         "avg": false,
         "current": false,
@@ -2517,18 +2251,18 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy=\"mutual_tls\", reporter=\"destination\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"source\", connection_security_policy=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{destination_workload_namespace }} (🔐mTLS)",
+          "legendFormat": "{{ destination_service }} (🔐mTLS)",
           "refId": "A",
           "step": 2
         },
         {
-          "expr": "round(sum(irate(istio_tcp_sent_bytes_total{connection_security_policy!=\"mutual_tls\", reporter=\"destination\", destination_service=~\"$service\", destination_workload=~\"$dstwl\", destination_workload_namespace=~\"$dstns\",cluster=~\"$cluster\"}[5m])) by (destination_workload, destination_workload_namespace), 0.001)",
+          "expr": "round(sum(irate(istio_tcp_received_bytes_total{reporter=\"source\", connection_security_policy!=\"mutual_tls\", source_workload_namespace=~\"$namespace\", source_workload=~\"$workload\", destination_service=~\"$dstsvc\",cluster=~\"$cluster\"}[5m])) by (destination_service), 0.001)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{ destination_workload }}.{{destination_workload_namespace }}",
+          "legendFormat": "{{ destination_service }}",
           "refId": "B",
           "step": 2
         }
@@ -2537,7 +2271,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Bytes Sent to Incoming TCP Connection",
+      "title": "Bytes Received from Outgoing TCP Connection",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2606,8 +2340,8 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "10.42.7.251:9090",
-          "value": "10.42.7.251:9090"
+          "text": "unknown",
+          "value": "unknown"
         },
         "datasource": "Prometheus",
         "definition": "",
@@ -2615,18 +2349,48 @@
         "error": null,
         "hide": 0,
         "includeAll": false,
-        "label": "Service",
+        "label": "Namespace",
         "multi": false,
-        "name": "service",
+        "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(destination_service)",
-          "refId": "Prometheus-service-Variable-Query"
+          "query": "query_result(sum(istio_requests_total) by (destination_workload_namespace) or sum(istio_tcp_sent_bytes_total) by (destination_workload_namespace))",
+          "refId": "Prometheus-namespace-Variable-Query"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": "/.*_namespace=\"([^\"]*).*/",
         "skipUrlSync": false,
         "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "Prometheus",
+        "definition": "",
+        "description": null,
+        "error": null,
+        "hide": 0,
+        "includeAll": false,
+        "label": "Workload",
+        "multi": false,
+        "name": "workload",
+        "options": [],
+        "query": {
+          "query": "query_result((sum(istio_requests_total{destination_workload_namespace=~\"$namespace\"}) by (destination_workload) or sum(istio_requests_total{source_workload_namespace=~\"$namespace\"}) by (source_workload)) or (sum(istio_tcp_sent_bytes_total{destination_workload_namespace=~\"$namespace\"}) by (destination_workload) or sum(istio_tcp_sent_bytes_total{source_workload_namespace=~\"$namespace\"}) by (source_workload)))",
+          "refId": "Prometheus-workload-Variable-Query"
+        },
+        "refresh": 1,
+        "regex": "/.*workload=\"([^\"]*).*/",
+        "skipUrlSync": false,
+        "sort": 1,
         "tagValuesQuery": "",
         "tagsQuery": "",
         "type": "query",
@@ -2675,12 +2439,12 @@
         "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": "Client Workload Namespace",
+        "label": "Inbound Workload Namespace",
         "multi": true,
         "name": "srcns",
         "options": [],
         "query": {
-          "query": "query_result(sum(istio_requests_total{reporter=\"$qrep\", destination_service=\"$service\"}) by (source_workload_namespace) or sum(istio_tcp_sent_bytes_total{reporter=\"$qrep\", destination_service=~\"$service\"}) by (source_workload_namespace))",
+          "query": "query_result(sum(istio_requests_total{reporter=\"$qrep\", destination_workload=\"$workload\", destination_workload_namespace=~\"$namespace\"}) by (source_workload_namespace) or sum(istio_tcp_sent_bytes_total{reporter=\"$qrep\", destination_workload=\"$workload\", destination_workload_namespace=~\"$namespace\"}) by (source_workload_namespace))",
           "refId": "Prometheus-srcns-Variable-Query"
         },
         "refresh": 1,
@@ -2705,12 +2469,12 @@
         "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": "Client Workload",
+        "label": "Inbound Workload",
         "multi": true,
         "name": "srcwl",
         "options": [],
         "query": {
-          "query": "query_result(sum(istio_requests_total{reporter=\"$qrep\", destination_service=~\"$service\", source_workload_namespace=~\"$srcns\"}) by (source_workload) or sum(istio_tcp_sent_bytes_total{reporter=\"$qrep\", destination_service=~\"$service\", source_workload_namespace=~\"$srcns\"}) by (source_workload))",
+          "query": "query_result(sum(istio_requests_total{reporter=\"$qrep\", destination_workload=\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload_namespace=~\"$srcns\"}) by (source_workload) or sum(istio_tcp_sent_bytes_total{reporter=\"$qrep\", destination_workload=\"$workload\", destination_workload_namespace=~\"$namespace\", source_workload_namespace=~\"$srcns\"}) by (source_workload))",
           "refId": "Prometheus-srcwl-Variable-Query"
         },
         "refresh": 1,
@@ -2735,48 +2499,18 @@
         "error": null,
         "hide": 0,
         "includeAll": true,
-        "label": "Service Workload Namespace",
+        "label": "Destination Service",
         "multi": true,
-        "name": "dstns",
+        "name": "dstsvc",
         "options": [],
         "query": {
-          "query": "query_result(sum(istio_requests_total{reporter=\"destination\", destination_service=\"$service\"}) by (destination_workload_namespace) or sum(istio_tcp_sent_bytes_total{reporter=\"destination\", destination_service=~\"$service\"}) by (destination_workload_namespace))",
-          "refId": "Prometheus-dstns-Variable-Query"
+          "query": "query_result(sum(istio_requests_total{reporter=\"source\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\"}) by (destination_service) or sum(istio_tcp_sent_bytes_total{reporter=\"source\", source_workload=~\"$workload\", source_workload_namespace=~\"$namespace\"}) by (destination_service))",
+          "refId": "Prometheus-dstsvc-Variable-Query"
         },
         "refresh": 1,
-        "regex": "/.*namespace=\"([^\"]*).*/",
+        "regex": "/.*destination_service=\"([^\"]*).*/",
         "skipUrlSync": false,
-        "sort": 2,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "allValue": null,
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
-        "definition": "",
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": true,
-        "label": "Service Workload",
-        "multi": true,
-        "name": "dstwl",
-        "options": [],
-        "query": {
-          "query": "query_result( sum(istio_requests_total{reporter=\"destination\", destination_service=~\"$service\", destination_workload_namespace=~\"$dstns\"}) by (destination_workload) or sum(istio_tcp_sent_bytes_total{reporter=\"destination\", destination_service=~\"$service\", destination_workload_namespace=~\"$dstns\"}) by (destination_workload))",
-          "refId": "Prometheus-dstwl-Variable-Query"
-        },
-        "refresh": 1,
-        "regex": "/.*workload=\"([^\"]*).*/",
-        "skipUrlSync": false,
-        "sort": 3,
+        "sort": 4,
         "tagValuesQuery": "",
         "tagsQuery": "",
         "type": "query",
@@ -2837,7 +2571,7 @@
     ]
   },
   "timezone": "",
-  "title": "Istio Service Dashboard",
-  "uid": "g05XZVI7k",
+  "title": "Istio Workload Dashboard",
+  "uid": "9GumMVInk",
   "version": 4
 }

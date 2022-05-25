@@ -4,12 +4,12 @@ controller:
    registrar:
      image: quay.io/k8scsi/csi-cluster-driver-registrar:v1.0.1
    onedata:
-     image: cerit.io/csi-onedata:latest
+     image: cerit.io/csi/csi-onedata:latest
 node:
    registrar:
      image: quay.io/k8scsi/csi-node-driver-registrar:v1.0.2
    onedata:
-     image: cerit.io/csi-onedata
+     image: cerit.io/csi/csi-onedata:latest
 
 storageclass:
    name: onedata
