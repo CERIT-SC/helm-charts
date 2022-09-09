@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1                                        
+kind: Role                                                                      
+metadata:                                                                       
+  name: hubresguard-pod-role                                                    
+  namespace: {{ .Values.cronjob.jhNamespace }}
+rules:                                                                          
+- apiGroups: [""] 
+  resources: ["pods"]                                                           
+  verbs: ["get", "watch", "list", "patch", "delete"]                            
+---                                                                             
+apiVersion: rbac.authorization.k8s.io/v1                                        
+kind: RoleBinding                                                               
+metadata:                                                                       
+  name: hubresguard-pod-roleb                                                   
+  namespace: {{ .Values.cronjob.jhNamespace }}
+subjects:                                                                       
+- kind: ServiceAccount                                                          
+  name: hubresguard-sa                                                          
+  namespace: {{ .Values.namespace }}
+roleRef:                                                                        
+  kind: Role                                                                    
+  name: hubresguard-pod-role                                                    
+  apiGroup: rbac.authorization.k8s.io

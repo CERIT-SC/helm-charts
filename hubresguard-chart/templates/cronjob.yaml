@@ -1,0 +1,46 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hubresourcesguard-cj
+  namespace: {{ .Values.namespace }}
+spec:
+  concurrencyPolicy: "Forbid"
+  schedule: {{ .Values.cronjob.schedule }}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ .Values.cronjob.ttlSecondsAfterFinished }}
+      completions: 1
+      parallelism: 1
+      template:
+        spec:
+          containers:
+          - name: hubresguard
+            image: {{ .Values.cronjob.image }} 
+            imagePullPolicy: IfNotPresent
+            command:
+            - "hubresguard" 
+            env:
+              - name: "NAMESPACE"
+                value: {{ .Values.cronjob.jhNamespace }} 
+              - name: "CLUSTER"
+                value: {{ .Values.cronjob.cluster }} 
+              - name: "CREDS_DIR"
+                value: {{ .Values.prometheus.credentialsDir }}
+              - name: "QUERY_TIME"
+                value: {{ .Values.cronjob.queryTime }}
+              - name: "GPU_MAX_DAYS"
+                value: {{ .Values.cronjob.gpuMaxDays }}
+              - name: "CPU_MAX_DAYS"
+                value: {{ .Values.cronjob.cpuMaxDays }}
+            volumeMounts:
+              - mountPath: {{ .Values.prometheus.credentialsDir }}
+                name: prometheus-secret
+                readOnly: true
+          restartPolicy: OnFailure
+          serviceAccount: hubresguard-sa
+          securityContext:
+            runAsUser: 1000
+          volumes:
+            - name: prometheus-secret
+              secret:
+                secretName: prometheus-credentials
