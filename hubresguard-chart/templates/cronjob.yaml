@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   concurrencyPolicy: "Forbid"
-  schedule: {{ .Values.cronjob.schedule }}
+  schedule: {{ .Values.cronjob.schedule | quote }}
   jobTemplate:
     spec:
       ttlSecondsAfterFinished: {{ .Values.cronjob.ttlSecondsAfterFinished }}
@@ -21,19 +21,19 @@ spec:
             - "hubresguard" 
             env:
               - name: "NAMESPACE"
-                value: {{ .Values.cronjob.jhNamespace }} 
+                value: {{ .Values.cronjob.jhNamespace | quote }} 
               - name: "CLUSTER"
-                value: {{ .Values.cronjob.cluster }} 
+                value: {{ .Values.cronjob.cluster | quote }} 
               - name: "CREDS_DIR"
-                value: {{ .Values.prometheus.credentialsDir }}
+                value: {{ .Values.prometheus.credentialsDir | quote }}
               - name: "QUERY_TIME"
-                value: {{ .Values.cronjob.queryTime }}
+                value: {{ .Values.cronjob.queryTime | quote }}
               - name: "GPU_MAX_DAYS"
-                value: {{ .Values.cronjob.gpuMaxDays }}
+                value: {{ .Values.cronjob.gpuMaxDays | quote }}
               - name: "CPU_MAX_DAYS"
-                value: {{ .Values.cronjob.cpuMaxDays }}
+                value: {{ .Values.cronjob.cpuMaxDays | quote }}
             volumeMounts:
-              - mountPath: {{ .Values.prometheus.credentialsDir }}
+              - mountPath: {{ .Values.prometheus.credentialsDir | quote }}
                 name: prometheus-secret
                 readOnly: true
           restartPolicy: OnFailure
