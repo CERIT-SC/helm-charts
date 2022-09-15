@@ -6,6 +6,7 @@ cronjob:
   image: cerit.io/cerit/hubresguard:08-09-2022-1
   jhNamespace: "jupyterhub-ns" # namespace where jupyterHub is deployed
   cluster: "kuba"
+  sender: "" 
   queryTime: "86400" # 24h
   gpuMaxDays: "3"
   cpuMaxDays: "10"

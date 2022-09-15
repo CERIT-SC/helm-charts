@@ -26,6 +26,8 @@ spec:
                 value: {{ .Values.cronjob.cluster | quote }} 
               - name: "CREDS_DIR"
                 value: {{ .Values.prometheus.credentialsDir | quote }}
+              - name: "CREDS_DIR"
+                value: {{ .Values.cronjob.sender | quote }}
               - name: "QUERY_TIME"
                 value: {{ .Values.cronjob.queryTime | quote }}
               - name: "GPU_MAX_DAYS"
