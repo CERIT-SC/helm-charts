@@ -28,6 +28,10 @@ spec:
                 value: {{ .Values.prometheus.credentialsDir | quote }}
               - name: "SENDER"
                 value: {{ .Values.cronjob.sender | quote }}
+              - name: "HELO"
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
               - name: "QUERY_TIME"
                 value: {{ .Values.cronjob.queryTime | quote }}
               - name: "GPU_MAX_DAYS"

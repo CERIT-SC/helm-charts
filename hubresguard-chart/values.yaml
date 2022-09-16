@@ -3,7 +3,7 @@ namespace:
 cronjob:
   schedule: "0 8 * * *" # UTC
   ttlSecondsAfterFinished: 10800 # 3h
-  image: cerit.io/cerit/hubresguard:08-09-2022-1
+  image: cerit.io/cerit/hubresguard:16-09-2022
   jhNamespace: "jupyterhub-ns" # namespace where jupyterHub is deployed
   cluster: "kuba"
   sender: "" 
