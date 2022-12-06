@@ -170,7 +170,7 @@ dashboards:
 dashboardslabel: "grafana_dashboard"
 datasourcelabel: "grafana_datasource"
 stats:
-  image: cerit.io/project-stats:v0.06
+  image: cerit.io/cerit/project-stats:v0.06
   securityContext:
     runAsUser: 1000
     runAsGroup: 1000
