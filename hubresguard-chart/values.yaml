@@ -3,13 +3,13 @@ namespace:
 cronjob:
   schedule: "0 8 * * *" # UTC
   ttlSecondsAfterFinished: 10800 # 3h
-  image: cerit.io/cerit/hubresguard:16-09-2022
+  image: cerit.io/cerit/hubresguard:12-12-2022
   jhNamespace: "jupyterhub-ns" # namespace where jupyterHub is deployed
   cluster: "kuba"
   sender: "" 
   queryTime: "86400" # 24h
-  gpuMaxDays: "3"
-  cpuMaxDays: "10"
+  gpuMaxDays: "2"
+  cpuMaxDays: "7"
 
 prometheus:
   credentialsDir: "/mnt/prometheus/" # trailing slash is important!
