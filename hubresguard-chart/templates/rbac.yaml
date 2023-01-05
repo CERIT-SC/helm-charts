@@ -21,3 +21,28 @@ roleRef:
   kind: Role                                                                    
   name: hubresguard-pod-role                                                    
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1                                                                                                                                                  
+kind: ClusterRole                                                                      
+metadata:                                                                       
+  name: hubresguard-pod-role-cluster                                            
+rules:                                                                          
+- apiGroups: [""]                                                               
+  resources: ["pods"]                                                           
+  verbs: ["get", "watch", "list", "patch", "delete"]                            
+- apiGroups: [""]                                                               
+  resources: ["namespaces"]                                                     
+  verbs: ["get", "watch", "list", "patch", "create"]                            
+---                                                                             
+apiVersion: rbac.authorization.k8s.io/v1                                        
+kind: ClusterRoleBinding                                                        
+metadata:                                                                       
+  name: hubresguard-pod-roleb-cluster                                           
+subjects:                                                                       
+- kind: ServiceAccount                                                          
+  name: hubresguard-sa                                                          
+  namespace: hubresguard                                                        
+roleRef:                                                                        
+  kind: ClusterRole                                                             
+  name: hubresguard-pod-role-cluster                                            
+  apiGroup: rbac.authorization.k8s.io
