@@ -22,7 +22,7 @@ spec:
             - "hubresguard" 
             env:
               - name: "NAMESPACE"
-                value: {{ .Values.cronjob.jhNamespace | quote }} 
+                value: {{ .Values.cronjob.userNamespace | quote }} 
               - name: "CLUSTER"
                 value: {{ .Values.cronjob.cluster | quote }} 
               - name: "CREDS_DIR"
