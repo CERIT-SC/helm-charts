@@ -3,7 +3,7 @@ entries:
   csi-onedata:
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.303846+01:00"
+    created: "2023-01-05T21:04:16.435534+01:00"
     description: A Helm chart for OneData storage class
     digest: dff9fdd9fde3e73456980c9428ac8e7cbb6d218b9c5f4e5e7008fddafe3b6bc9
     name: csi-onedata
@@ -13,7 +13,7 @@ entries:
     version: "0.4"
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.30358+01:00"
+    created: "2023-01-05T21:04:16.435278+01:00"
     description: A Helm chart for OneData storage class
     digest: f904ec6ad4b520bf47abee3ca87c0b88dfe0985133a3f542b47b7955458464c9
     name: csi-onedata
@@ -23,7 +23,7 @@ entries:
     version: "0.3"
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.303201+01:00"
+    created: "2023-01-05T21:04:16.434985+01:00"
     description: A Helm chart for OneData storage class
     digest: ff79c70b25622fdada977422613414be966f665e15b30c8e72ddf256ef238850
     name: csi-onedata
@@ -33,7 +33,7 @@ entries:
     version: "0.2"
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.302888+01:00"
+    created: "2023-01-05T21:04:16.434697+01:00"
     description: A Helm chart for OneData storage class
     digest: 2254b27db3c3f2ab9a0a6ebc3508a6a307161d4991b751686adf818e62e8625c
     name: csi-onedata
@@ -44,7 +44,17 @@ entries:
   hubresguard:
   - apiVersion: v2
     appVersion: "0.3"
-    created: "2023-01-05T16:28:31.306517+01:00"
+    created: "2023-01-05T21:04:16.438297+01:00"
+    description: A Helm chart for resource utility for JupyterHub instances
+    digest: 43095d037822984b2ff632c4840135a0d878a9ca5613a955fa281b41ac7da35d
+    name: hubresguard
+    type: application
+    urls:
+    - hubresguard-0.4.3.tgz
+    version: 0.4.3
+  - apiVersion: v2
+    appVersion: "0.3"
+    created: "2023-01-05T21:04:16.43803+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: b5d3855278dd5c8ba9e5e235c4a17f0cfb339ed637b112c7071fec0a3b07c6a5
     name: hubresguard
@@ -54,7 +64,7 @@ entries:
     version: 0.4.2
   - apiVersion: v2
     appVersion: "0.3"
-    created: "2023-01-05T16:28:31.306293+01:00"
+    created: "2023-01-05T21:04:16.437316+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: 6939c27e567f70ad5c2b15d41800c90591908750e429278bfa2c0c2c20367aee
     name: hubresguard
@@ -64,7 +74,7 @@ entries:
     version: 0.4.1
   - apiVersion: v2
     appVersion: "0.3"
-    created: "2023-01-05T16:28:31.305414+01:00"
+    created: "2023-01-05T21:04:16.4371+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: 4f7b516d468fdf0a06be113ea2186118fa3e5b2172719b709c39b9d279ade510
     name: hubresguard
@@ -74,7 +84,7 @@ entries:
     version: 0.4.0
   - apiVersion: v2
     appVersion: "0.2"
-    created: "2023-01-05T16:28:31.304966+01:00"
+    created: "2023-01-05T21:04:16.436624+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: e4d80c646d7eec9272fe7f465633d84370565d39ebececb986427d8b96a3477d
     name: hubresguard
@@ -84,7 +94,7 @@ entries:
     version: 0.3.3
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.304738+01:00"
+    created: "2023-01-05T21:04:16.436397+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: 39c24889f2cfd73440fc1c261737ccef5a63e4f6fec6deaf150954dec643f4b9
     name: hubresguard
@@ -94,7 +104,7 @@ entries:
     version: 0.3.2
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.304532+01:00"
+    created: "2023-01-05T21:04:16.43618+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: d22b7fb4104d341342848c76844be7e14e2cc05537dcc844e3a708d39477d684
     name: hubresguard
@@ -104,7 +114,7 @@ entries:
     version: 0.3.1
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.305179+01:00"
+    created: "2023-01-05T21:04:16.436875+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: 283c212c966ea90105ff0a5b28cf81a911ab7f3109ad2775ad304adb8a6ae5d5
     name: hubresguard
@@ -114,7 +124,7 @@ entries:
     version: "0.3"
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.304319+01:00"
+    created: "2023-01-05T21:04:16.435962+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: 0307a033fb5688cd54850365f008f36b6b5cb8408e69a6b7f220a381233cada3
     name: hubresguard
@@ -124,7 +134,7 @@ entries:
     version: "0.2"
   - apiVersion: v2
     appVersion: "0.1"
-    created: "2023-01-05T16:28:31.304096+01:00"
+    created: "2023-01-05T21:04:16.435756+01:00"
     description: A Helm chart for resource utility for JupyterHub instances
     digest: c132a806b94ace17301e799d2020456ca6800dccbc70fbce5f8cbe0a6a760e7d
     name: hubresguard
@@ -135,7 +145,7 @@ entries:
   monitoring-master:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.42653+01:00"
+    created: "2023-01-05T21:04:16.557643+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -155,7 +165,7 @@ entries:
     version: 0.2.12
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.418775+01:00"
+    created: "2023-01-05T21:04:16.550031+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -175,7 +185,7 @@ entries:
     version: 0.2.11
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.410755+01:00"
+    created: "2023-01-05T21:04:16.542408+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -195,7 +205,7 @@ entries:
     version: 0.2.10
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.505936+01:00"
+    created: "2023-01-05T21:04:16.637081+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -215,7 +225,7 @@ entries:
     version: 0.2.9
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.497698+01:00"
+    created: "2023-01-05T21:04:16.629476+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -235,7 +245,7 @@ entries:
     version: 0.2.8
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.489551+01:00"
+    created: "2023-01-05T21:04:16.621395+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -255,7 +265,7 @@ entries:
     version: 0.2.7
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.479392+01:00"
+    created: "2023-01-05T21:04:16.611073+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -275,7 +285,7 @@ entries:
     version: 0.2.6
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.468533+01:00"
+    created: "2023-01-05T21:04:16.600455+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -295,7 +305,7 @@ entries:
     version: 0.2.5
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.4583+01:00"
+    created: "2023-01-05T21:04:16.590185+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -315,7 +325,7 @@ entries:
     version: 0.2.4
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.447375+01:00"
+    created: "2023-01-05T21:04:16.578615+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -335,7 +345,7 @@ entries:
     version: 0.2.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.436849+01:00"
+    created: "2023-01-05T21:04:16.568314+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -355,7 +365,7 @@ entries:
     version: 0.2.2
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.403084+01:00"
+    created: "2023-01-05T21:04:16.53446+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -375,7 +385,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.392307+01:00"
+    created: "2023-01-05T21:04:16.523839+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -395,7 +405,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.381739+01:00"
+    created: "2023-01-05T21:04:16.513582+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -415,7 +425,7 @@ entries:
     version: 0.1.9
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.371352+01:00"
+    created: "2023-01-05T21:04:16.501946+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -435,7 +445,7 @@ entries:
     version: 0.1.8
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.363596+01:00"
+    created: "2023-01-05T21:04:16.494231+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -455,7 +465,7 @@ entries:
     version: 0.1.7
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.355199+01:00"
+    created: "2023-01-05T21:04:16.486582+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -475,7 +485,7 @@ entries:
     version: 0.1.6
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.347018+01:00"
+    created: "2023-01-05T21:04:16.478333+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -495,7 +505,7 @@ entries:
     version: 0.1.5
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.338406+01:00"
+    created: "2023-01-05T21:04:16.469862+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -515,7 +525,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.329234+01:00"
+    created: "2023-01-05T21:04:16.460897+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -535,7 +545,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.318999+01:00"
+    created: "2023-01-05T21:04:16.450368+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -556,7 +566,7 @@ entries:
   monitoring-personal:
   - apiVersion: v2
     appVersion: 0.3.0
-    created: "2023-01-05T16:28:31.588997+01:00"
+    created: "2023-01-05T21:04:16.719166+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -573,7 +583,7 @@ entries:
     version: 0.0.15
   - apiVersion: v2
     appVersion: 0.2.0
-    created: "2023-01-05T16:28:31.58373+01:00"
+    created: "2023-01-05T21:04:16.714293+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -590,7 +600,7 @@ entries:
     version: 0.0.14
   - apiVersion: v2
     appVersion: 0.2.0
-    created: "2023-01-05T16:28:31.578625+01:00"
+    created: "2023-01-05T21:04:16.709241+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -607,7 +617,7 @@ entries:
     version: 0.0.13
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.57344+01:00"
+    created: "2023-01-05T21:04:16.703552+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -624,7 +634,7 @@ entries:
     version: 0.0.12
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.5663+01:00"
+    created: "2023-01-05T21:04:16.696678+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -641,7 +651,7 @@ entries:
     version: 0.0.11
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.560879+01:00"
+    created: "2023-01-05T21:04:16.691436+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -658,7 +668,7 @@ entries:
     version: 0.0.10
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.555311+01:00"
+    created: "2023-01-05T21:04:16.68581+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -675,7 +685,7 @@ entries:
     version: 0.0.09
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.549735+01:00"
+    created: "2023-01-05T21:04:16.680231+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -692,7 +702,7 @@ entries:
     version: 0.0.08
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.543578+01:00"
+    created: "2023-01-05T21:04:16.674694+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -709,7 +719,7 @@ entries:
     version: 0.0.07
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.538149+01:00"
+    created: "2023-01-05T21:04:16.669188+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -726,7 +736,7 @@ entries:
     version: 0.0.06
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.532576+01:00"
+    created: "2023-01-05T21:04:16.664127+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -743,7 +753,7 @@ entries:
     version: 0.0.05
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.52723+01:00"
+    created: "2023-01-05T21:04:16.658645+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -760,7 +770,7 @@ entries:
     version: 0.0.04
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.522274+01:00"
+    created: "2023-01-05T21:04:16.65317+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -777,7 +787,7 @@ entries:
     version: 0.0.03
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.516823+01:00"
+    created: "2023-01-05T21:04:16.647778+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -794,7 +804,7 @@ entries:
     version: 0.0.02
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.51139+01:00"
+    created: "2023-01-05T21:04:16.642411+01:00"
     dependencies:
     - name: grafana
       repository: https://grafana.github.io/helm-charts
@@ -812,7 +822,7 @@ entries:
   monitoring-worker:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.594995+01:00"
+    created: "2023-01-05T21:04:16.725804+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -829,7 +839,7 @@ entries:
     version: 0.1.10
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.640302+01:00"
+    created: "2023-01-05T21:04:16.771422+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -846,7 +856,7 @@ entries:
     version: 0.1.9
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.6345+01:00"
+    created: "2023-01-05T21:04:16.765803+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -863,7 +873,7 @@ entries:
     version: 0.1.8
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.628932+01:00"
+    created: "2023-01-05T21:04:16.760002+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -880,7 +890,7 @@ entries:
     version: 0.1.7
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.623215+01:00"
+    created: "2023-01-05T21:04:16.754383+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -897,7 +907,7 @@ entries:
     version: 0.1.6
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.61745+01:00"
+    created: "2023-01-05T21:04:16.748529+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -914,7 +924,7 @@ entries:
     version: 0.1.5
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.611605+01:00"
+    created: "2023-01-05T21:04:16.742677+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -931,7 +941,7 @@ entries:
     version: 0.1.4
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.606214+01:00"
+    created: "2023-01-05T21:04:16.737358+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -948,7 +958,7 @@ entries:
     version: 0.1.3
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2023-01-05T16:28:31.60059+01:00"
+    created: "2023-01-05T21:04:16.731469+01:00"
     dependencies:
     - name: promtail
       repository: https://grafana.github.io/helm-charts
@@ -966,7 +976,7 @@ entries:
   spark-operator:
   - apiVersion: v2
     appVersion: v1beta2-1.3.4-3.1.1
-    created: "2023-01-05T16:28:31.641621+01:00"
+    created: "2023-01-05T21:04:16.772748+01:00"
     description: A Helm chart for Spark on Kubernetes operator
     digest: e103c35cb7045f0fb0891f9117deee46492edbd99f6590df06a30b13cb30f47e
     home: https://github.com/GoogleCloudPlatform/spark-on-k8s-operator
@@ -979,4 +989,4 @@ entries:
     urls:
     - spark-operator-1.1.20.tgz
     version: 1.1.20
-generated: "2023-01-05T16:28:31.302165+01:00"
+generated: "2023-01-05T21:04:16.433866+01:00"
