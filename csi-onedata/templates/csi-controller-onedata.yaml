@@ -34,7 +34,6 @@ spec:
           image: {{ .Values.controller.registrar.image }}
           args:
             - "--v=5"
-            - "--pod-info-mount-version=\"v1\""
             - "--csi-address=$(ADDRESS)"
           env:
             - name: ADDRESS
