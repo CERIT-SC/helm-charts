@@ -42,6 +42,8 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /csi
+            - name: registration-dir
+              mountPath: /registration
         - name: onedata
           image: {{ .Values.controller.onedata.image }}
           args :
@@ -63,3 +65,7 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 1Mi
+        - name: registration-dir
+          hostPath:
+            path: /var/lib/kubelet/plugins_registry
+            type: Directory
