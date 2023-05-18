@@ -104,6 +104,18 @@ grafana:
     pspEnabled: false
   serviceAccount:
     create: false
+  securityContext:
+    runAsUser: 472
+    runAsGroup: 472
+    fsGroup: 472
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
   datasources:
     datasources.yaml:
       apiVersion: 1
