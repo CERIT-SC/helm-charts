@@ -21,6 +21,9 @@ spec:
     {{- else }}
     runAsGroup: 1000
     {{- end }}
+    runAsNonRoot: true
+    seccompProfile:
+        type: RuntimeDefault 
   containers:
   - name: project-stats
     {{- if $.Values.stats.image }}
@@ -31,6 +34,11 @@ spec:
     imagePullPolicy: Always
     ports:
     - containerPort: 8080
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL 
     resources:
       requests:
         cpu: {{ $.Values.stats.resources.requests.cpu }}

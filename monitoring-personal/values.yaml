@@ -30,6 +30,15 @@ prometheus:
     enabled: false
   server:
     configMapOverrideName: prometheus-config
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    securityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
     livenessProbeInitialDelay: 60
     livenessProbeTimeout: 60
     readinessProbeInitialDelay: 60
