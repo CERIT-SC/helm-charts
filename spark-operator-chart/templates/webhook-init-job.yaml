@@ -22,6 +22,8 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
       - name: main
         image: {{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}
