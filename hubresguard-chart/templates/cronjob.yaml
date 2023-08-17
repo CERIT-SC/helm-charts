@@ -57,5 +57,5 @@ spec:
               secret:
                 secretName: prometheus-credentials
             - name: influx-secret
-               secret:
+              secret:
                  secretName: influx-credentials
