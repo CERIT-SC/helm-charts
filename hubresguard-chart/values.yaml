@@ -18,4 +18,9 @@ prometheus:
   password: # plaintext
   promaddr: # plaintext
 
-
+influx:
+  credentialsDir: "/mnt/influxdb/"
+  influxdburl: ""
+  influxdbauth: ""
+  org: ""
+  bucket: ""

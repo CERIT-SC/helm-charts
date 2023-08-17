@@ -39,9 +39,14 @@ spec:
                 value: {{ .Values.cronjob.gpuMaxDays | quote }}
               - name: "CPU_MAX_DAYS"
                 value: {{ .Values.cronjob.cpuMaxDays | quote }}
+              - name: "INFLUXDB_PATH"
+                value: {{ .Values.influx.credentialsDir | quote }}
             volumeMounts:
               - mountPath: {{ .Values.prometheus.credentialsDir | quote }}
                 name: prometheus-secret
+                readOnly: true
+              - name: influx-secret
+                mountPath: {{ .Values.influx.credentialsDir | quote }}
                 readOnly: true
           restartPolicy: OnFailure
           serviceAccount: hubresguard-sa
@@ -51,3 +56,6 @@ spec:
             - name: prometheus-secret
               secret:
                 secretName: prometheus-credentials
+             - name: influx-secret
+               secret:
+                 secretName: influx-credentials
