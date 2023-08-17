@@ -3,4 +3,4 @@ name: hubresguard
 description: A Helm chart for resource utility for JupyterHub instances
 type: application
 appVersion: "0.5"
-version: "0.5.2"
+version: "0.5.3"
