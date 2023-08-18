@@ -48,10 +48,20 @@ spec:
               - name: influx-secret
                 mountPath: {{ .Values.influx.credentialsDir | quote }}
                 readOnly: true
+            securityContext: # Container security context
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
           restartPolicy: OnFailure
           serviceAccount: hubresguard-sa
           securityContext:
             runAsUser: 1000
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
           volumes:
             - name: prometheus-secret
               secret:
