@@ -59,7 +59,6 @@ spec:
           securityContext:
             runAsUser: 1000
             runAsNonRoot: true
-            allowPrivilegeEscalation: false
             seccompProfile:
               type: RuntimeDefault
           volumes:
