@@ -1,0 +1,15 @@
+apiVersion: v1
+entries:
+  snm-hubresguard:
+  - apiVersion: v2
+    appVersion: "0.1"
+    created: "2024-12-15T20:08:12.382399+01:00"
+    description: A Helm chart for resource utility for JupyterHub with notebooks in
+      the same namespace; monitoring based
+    digest: 7a057481e0eb97999de548882c56fb7d39ec21ae471554d60e15f99717d96dfd
+    name: snm-hubresguard
+    type: application
+    urls:
+    - snm-hubresguard-0.1.2.tgz
+    version: 0.1.2
+generated: "2024-12-15T20:08:12.381132+01:00"
