@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: snm-hubresourcesguard-cj
+  namespace: {{ .Values.namespace }}
+spec:
+  successfulJobsHistoryLimit: {{ .Values.cronjob.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cronjob.failedJobsHistoryLimit }}
+  concurrencyPolicy: "Forbid"
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ .Values.cronjob.ttlSecondsAfterFinished }}
+      backoffLimit: {{ .Values.cronjob.backoffLimit }}
+      completions: 1
+      parallelism: 1
+      template:
+        metadata:
+          labels:
+            app: snm-hubresguard
+        spec:
+          containers:
+          - name: hubresguard
+            image: {{ .Values.cronjob.image }} 
+            imagePullPolicy: Always
+            command:
+            - "snm-hubresguard"
+            env:
+              - name: "NAMESPACE"
+                value: {{ .Values.cronjob.notebookNamespace | quote }} 
+              - name: "CLUSTER"
+                value: {{ .Values.cronjob.cluster | quote }} 
+              - name: "HUB_ADDR"
+                value: {{ .Values.cronjob.hubAddr | quote }} 
+              - name: "PROMETHEUS_CREDS_PATH"
+                value: {{ .Values.prometheus.credentialsDir | quote }}
+              - name: "HELO"
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
+              - name: "QUERY_TIME"
+                value: {{ .Values.cronjob.queryTime | quote }}
+              - name: "GPU_MAX_DAYS"
+                value: {{ .Values.cronjob.gpuMaxDays | quote }}
+              - name: "CPU_MAX_DAYS"
+                value: {{ .Values.cronjob.cpuMaxDays | quote }}
+              - name: "INFLUXDB_CREDS_PATH"
+                value: {{ .Values.influx.credentialsDir | quote }}
+              - name: "INFLUXDB_MEASUREMENT"
+                value: {{ .Values.influx.measurement | quote }}
+            volumeMounts:
+              - mountPath: {{ .Values.prometheus.credentialsDir | quote }}
+                name: prometheus-secret
+                readOnly: true
+              - name: influx-secret
+                mountPath: {{ .Values.influx.credentialsDir | quote }}
+                readOnly: true
+            securityContext: # Container security context
+              runAsUser: 1000
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+          restartPolicy: OnFailure
+          serviceAccount: hubresguard-sa
+          securityContext:
+            runAsUser: 1000
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumes:
+            - name: prometheus-secret
+              secret:
+                secretName: prometheus-credentials
+            - name: influx-secret
+              secret:
+                secretName: influx-credentials

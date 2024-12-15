@@ -1,0 +1,29 @@
+namespace: epcp-ns                                                                                                                
+                                                                                
+label: "green"                                                                  
+                                                                                
+cronjob:                                                                        
+  schedule: "0 */3 * * *" # UTC                                                   
+  ttlSecondsAfterFinished: 10800 # 3h                                            
+  successfulJobsHistoryLimit: 3                                                 
+  failedJobsHistoryLimit: 3                                                     
+  backoffLimit: 0                                                               
+  image: cerit.io/cerit/epcpsimulator:01-05-2024-1                              
+  hours: "-3"                                                                   
+  wsdlUrl: "https://www.ote-cr.cz/services/PublicDataService"                   
+                                                                                
+cjSC:                                                                           
+  runAsUser: 0                                                                  
+                                                                                
+containerSC:                                                                    
+  runAsUser: 0                                                                  
+  privileged: true                                                              
+                                                                                
+volumeMounts:                                                                   
+  - mountPath: /sys/devices/system/cpu/                                         
+    name: cpufreq-volume                                                        
+                                                                                
+volumes:                                                                        
+  - name: cpufreq-volume                                                        
+    hostPath:                                                                   
+      path: /sys/devices/system/cpu/

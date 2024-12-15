@@ -1,0 +1,44 @@
+{{ if .Values.db.initdb }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name}}-init-db-schema
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: init-db-schema
+        image: ghcr.io/cloudnative-pg/postgresql:{{ .Values.db.postgresversion }}
+        command: ['/bin/bash', '-c', 'sleep 30; IFS=":" read -r -a pg < /var/tmp/pgpass; while ! psql postgresql://${pg[3]}:${pg[4]}@${pg[0]}:${pg[1]}/${pg[2]} < /dev/null; do sleep 1; done; psql postgresql://${pg[3]}:${pg[4]}@${pg[0]}:${pg[1]}/${pg[2]} < /var/tmp/schema.sql; /bin/true']
+        securityContext:
+          runAsUser: 26
+          runAsGroup: 999
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+        resources:
+          limits:
+           cpu: 1
+           memory: '2Gi'
+        volumeMounts:
+        - name: schema
+          mountPath: /var/tmp/schema.sql
+          subPath: schema.sql
+        - name: pgpass
+          mountPath: /var/tmp/pgpass
+          subPath: pgpass
+      volumes:
+      - name: schema
+        configMap:
+          name: {{ .Release.Name }}-schema-db
+      - name: pgpass
+        secret:
+          secretName: {{ .Release.Name }}-{{ .Values.db.dbname }}-app
+{{ end }}

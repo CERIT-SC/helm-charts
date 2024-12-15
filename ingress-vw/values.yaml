@@ -1,0 +1,26 @@
+name: 
+namespace: 
+
+debug:
+  enabled: false
+
+networkPolicy:
+  enabled: false
+  matchLabels:
+    k8s-app: ingress-vh-app
+  cidr: 10.16.48.16/28
+
+deployment:
+  image: cerit.io/cerit/ingressvw:24-07-2024-1
+  memory:
+  cpu:
+
+webhook:
+  path: 
+  apiGroups: 
+    - ""
+  apiVersions:
+    - "v1"
+  operations:
+  resources:
+

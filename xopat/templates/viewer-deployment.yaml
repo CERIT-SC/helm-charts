@@ -1,0 +1,155 @@
+{{ if .Values.viewer.deploy }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name}}-viewer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name}}-viewer
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name}}-viewer
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+        fsGroup: 33
+      initContainers:
+      - name: git
+        image: alpine/git
+        imagePullPolicy: IfNotPresent
+        command: [ '/bin/sh', '-c', 'cd /mnt/viewer && rm -rf * .[a-z]* && export HTTPS_PROXY=http://proxy.ics.muni.cz:3128 && git clone --single-branch --branch {{ .Values.viewer.gittags.viewer }} https://github.com/RationAI/xopat.git . && cd /mnt/browser && rm -rf * .[a-z]* && git clone --single-branch --branch {{ .Values.viewer.gittags.browser }} https://github.com/RationAI/browser.git .']
+        securityContext:
+          runAsUser: 33
+          runAsGroup: 33
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+        volumeMounts:
+        - name: viewer
+          mountPath: /mnt/viewer
+        - name: browser
+          mountPath: /mnt/browser
+      containers:
+      - name: viewer
+        image: {{ .Values.viewer.image }}
+        imagePullPolicy: Always
+        env:
+        - name: XO_URI
+          value: https://{{ .Values.ingress.host }}/
+        - name: XO_BROWSER_ANALYSIS
+          value: https://{{ .Values.ingress.host }}/{{ .Values.miraximporter.analysispath}}
+        - name: XO_DB_DRIVER
+          value: pgsql
+        - name: XO_DB_HOST
+          value: {{ .Release.Name}}-{{ .Values.db.dbname }}-rw
+        - name: XO_DB_PORT
+          value: '5432'
+        - name: XO_DB_USER
+          value: {{ .Values.db.dbuser }}
+        - name: XO_DB_NAME
+          value: {{ .Values.db.dbname }}
+        - name: XO_BASIC_AUTH
+          value: '1'
+        - name: XO_DB_PASS
+          valueFrom:
+            secretKeyRef:
+             key: password
+             name: {{ .Release.Name }}-{{ .Values.db.dbname }}-app   
+        securityContext:                               
+          runAsUser: 33 
+          runAsGroup: 33
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            cpu: 1
+            memory: 4Gi
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+          httpGet:
+            path: /health/
+            port: 8080
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+          httpGet:
+            path: /health/
+            port: 8080
+        volumeMounts:
+        - name: data
+          mountPath: /var/www/data/mlflow
+{{- if .Values.data.mlflowAFStorage.subPath }}
+          subPath: {{ .Values.data.mlflowAFStorage.subPath }}
+{{- end }}
+        - name: viewer
+          mountPath: /var/www/html/xopat
+        - name: browser
+          mountPath: /var/www/html/browser
+{{- if .Values.viewer.auth.enabled }}
+        - name: htpasswd
+          mountPath: /usr/local/etc/apache/.htpasswd
+          subPath: .htpasswd
+{{- end }}
+{{- if .Values.data.cancerStorage.existingClaim }}
+{{- if ne .Values.data.cancerStorage.existingClaim .Values.data.mlflowAFStorage.existingClaim }}
+        - name: cancer-data
+{{- else }}
+        - name: data
+{{- end }}
+          mountPath: /var/www/data/hub
+{{- if .Values.data.cancerStorage.subPath }}
+          subPath: {{ .Values.data.cancerStorage.subPath }}
+{{- end }}
+{{- end }}
+      volumes:
+      - name: browser
+        emptyDir: {}
+      - name: viewer
+        emptyDir: {}
+      - name: data
+        persistentVolumeClaim:
+      {{- if .Values.data.mlflowAFStorage.existingClaim }}
+          claimName: {{ .Values.data.mlflowAFStorage.existingClaim }}
+{{- else }}
+          claimName: {{ .Release.Name }}-pvc
+{{ end }}
+{{- if ne .Values.data.cancerStorage.existingClaim .Values.data.mlflowAFStorage.existingClaim }}
+{{- if .Values.data.cancerStorage.existingClaim }}
+      - name: cancer-data
+        persistentVolumeClaim:
+          claimName: {{ .Values.data.cancerStorage.existingClaim }}
+{{- end }}
+{{- end }}
+{{- if .Values.viewer.auth.enabled }}
+      - name: htpasswd
+        projected:
+          defaultMode: 420
+          sources:
+          - secret:
+              items: 
+              - key: htpasswd
+                path: .htpasswd
+              name: {{ .Release.Name}}-htpasswd
+{{- end }}
+{{ end }}

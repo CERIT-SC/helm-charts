@@ -1,0 +1,13 @@
+{{ if .Values.viewer.deploy }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-viewer
+spec:
+  selector:
+    app: {{ .Release.Name }}-viewer
+  ports:
+    - port: 8080
+      name: viewer
+      targetPort: 8080
+{{ end }}

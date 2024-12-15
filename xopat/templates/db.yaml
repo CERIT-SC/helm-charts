@@ -1,0 +1,60 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Release.Name }}-{{ .Values.db.dbname }}
+spec:
+  instances: 3
+
+  imageName: 'ghcr.io/cloudnative-pg/postgresql:{{ .Values.db.postgresversion }}'
+
+  primaryUpdateStrategy: unsupervised
+
+  bootstrap:
+    initdb:
+      database: {{ .Values.db.dbname }}
+      owner: {{ .Values.db.dbuser }}
+
+  postgresql:
+    parameters:
+      wal_keep_size: 8GB
+
+  replicationSlots:
+    highAvailability:
+      enabled: true
+
+  resources:
+    requests:
+      memory: "4096Mi"
+      cpu: 1
+    limits:
+      memory: "4096Mi"
+      cpu: 1
+
+  storage:
+    size: 10Gi
+    storageClass: {{ .Values.db.storageclass }}
+{{ if .Values.db.proxyenv }}
+  env:
+  - name: HTTPS_PROXY
+    value: 'http://proxy.ics.muni.cz:3128'
+  - name: NO_PROXY
+    value: '10.*,.cluster.local,127.0.0.1,::1,{{ .Release.Name }}-{{ .Values.db.dbname }}-rw,{{ .Release.Name }}-{{ .Values.db.dbname }}-ro,{{ .Release.Name }}-{{ .Values.db.dbname }}-r,10.0.0.0/8'
+{{ end }}
+
+{{ if .Values.db.backup.enabled }}
+  backup:
+    barmanObjectStore:
+      destinationPath: "s3://{{ .Values.db.backup.bucket }}/"
+      endpointURL: "https://s3.cl2.du.cesnet.cz"
+      s3Credentials:
+        accessKeyId:
+          name: s3-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: s3-creds
+          key: ACCESS_SECRET_KEY
+      wal:
+        compression: gzip
+    retentionPolicy: "30d"
+    target: primary
+{{ end }}

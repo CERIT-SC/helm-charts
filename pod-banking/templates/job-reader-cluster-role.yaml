@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.name }}-job-r-role
+rules:
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["sparkoperator.k8s.io"]
+  resources: ["sparkapplications", "sparkapplications/status"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [ "" ]
+  resources: [ "namespaces" ]
+  verbs: [ "get", "list"]

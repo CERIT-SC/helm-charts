@@ -1,0 +1,28 @@
+namespace: "abc"
+
+cronjob:
+  schedule: "0 1 * * *" # UTC
+  ttlSecondsAfterFinished: 7200 # 2h
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  backoffLimit: 0
+  image: cerit.io/cerit/epcpsimulator:04-03-2024-1
+  hours: "3"
+  wsdlUrl: "c"
+
+label: "green"
+
+cjSC:
+  runAsUser: 0
+
+containerSC:
+  runAsUser: 0
+
+volumeMounts:
+  - mountPath: /sys/devices/system/cpu/
+    name: cpufreq-volume 
+
+volumes:
+  - name: cpufreq-volume
+    hostPath:
+      path: /sys/devices/system/cpu/

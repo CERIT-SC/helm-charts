@@ -1,0 +1,15 @@
+name:
+namespace:
+
+networkPolicy:                                                                  
+  enabled: false                                                         
+  matchLabels:                                                                  
+    k8s-app: env-injector-hook-app
+  cidr: 10.16.48.16/28 
+
+deployment:
+  image: cerit.io/cerit/envinjector:08-03-2024
+  replicas: 1
+
+envs:
+  OMP_NUM_THREADS: limits.cpu

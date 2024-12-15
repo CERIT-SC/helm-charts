@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: {{ .Values.name }}-app
+  name: {{ .Values.name }}-deployment
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Values.name }}-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Values.name }}-app
+    spec:
+      containers:
+      - name: {{ .Values.name }}-container
+        resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+        imagePullPolicy: IfNotPresent
+        image: {{ .Values.deployment.image }}
+        readinessProbe:
+          httpGet:
+            port: 8443
+            path: /health
+            scheme: HTTPS
+          periodSeconds: 10
+        env:
+          - name: TLS_PATH
+            value: "/etc/tls"
+          - name: INFLUXDB_PATH
+            value: "/mnt/influxdb"
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: tls
+          mountPath: "/etc/tls"
+        - name: influxdb-secret
+          mountPath: "/mnt/influxdb"
+          readOnly: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - name: tls
+        secret:
+          secretName: {{ .Values.name }}-certificate
+      - name: influxdb-secret
+        secret:
+          secretName: influxdb-credentials

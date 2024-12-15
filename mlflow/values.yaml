@@ -1,0 +1,36 @@
+secure: false
+
+db:
+  name: mlflow
+  instances: 1
+  version: '14.8-2'
+  owner: mlflow
+  resources:
+    requests:
+      cpu: 1
+      memory: "4096Mi"
+    limits:
+      cpu: 1
+      memory: "4096Mi"
+  storage:
+    size: 20Gi
+    storageClass: nfs-csi
+  backup:
+    enable: false
+    path: 
+    url: 
+    accesskey: 
+    secretkey: 
+
+ingress:
+  host: "mlflow.dyn.cloud.e-infra.cz" 
+
+app:
+  cronschedule: '0 0 * * *'
+  gcdays: '30d'
+  readinessProbe:
+    enabled: false
+  livenessProbe:
+    enabled: false
+  #existingClaimName: biomedai-school-pvc
+  #subPath: "mlflow"

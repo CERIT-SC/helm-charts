@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: {{ .Values.name }}-app
+  name: {{ .Values.name }}-deployment
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      k8s-app: {{ .Values.name }}-app
+  replicas: {{ .Values.deployment.replicas }}
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ .Values.name }}-app
+    spec:
+      serviceAccount: {{ .Values.name }}-sa
+      containers:
+      - name: {{ .Values.name }}-container
+        resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+        imagePullPolicy: IfNotPresent
+        image: {{ .Values.deployment.image }}
+        readinessProbe:
+          httpGet:
+            port: 8443
+            path: /health
+            scheme: HTTPS
+          periodSeconds: 10
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: tls
+          mountPath: "/etc/tls"
+        - name: envs
+          mountPath: "/etc/env-cm"
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - name: tls
+        secret:
+          secretName: {{ .Values.name }}-certificate
+      - name: envs
+        configMap:
+          name: {{ .Values.name }}-cm

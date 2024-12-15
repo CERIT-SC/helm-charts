@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/mlflow-auth-configmap.yaml") . | sha256sum }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: mlflow
+        image: cerit.io/rationai/mlflow:{{ .Chart.AppVersion }}
+        imagePullPolicy: Always
+        command: ['/bin/sh', '-c', 'export DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@{{ .Values.db.name }}-rw:5432/mlflow; mlflow server --app-name basic-auth --host=0.0.0.0 --port=5000 -w 8 --backend-store-uri=$DATABASE_URL --serve-artifacts --artifacts-destination /data --gunicorn-opts "--timeout 600 --threads 4"'] 
+        env:
+        {{ if .Values.app.envVars }}
+        {{- toYaml .Values.app.envVars | nindent 8 }}
+        {{ end }}
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.name }}-db-app
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.db.name }}-db-app
+              key: password
+        - name: MLFLOW_HTTP_REQUEST_TIMEOUT
+          value: '600'
+        - name: MLFLOW_AUTH_CONFIG_PATH
+          value: "/etc/mlflow/basic_auth.ini"
+        securityContext:
+          runAsUser: 1001
+          runAsGroup: 1001
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          seccompProfile:
+            type: RuntimeDefault
+        resources:
+          requests:
+            cpu: 1
+            memory: '2Gi'
+          limits:
+            cpu: 8
+            memory: '8Gi' 
+{{ if .Values.app.readinessProbe.enabled }}
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 20
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 5000
+{{ end }}
+{{ if .Values.app.livenessProbe.enabled }}
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 20
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 5000
+{{ end }}
+        volumeMounts:
+         - name: data
+           mountPath: /data
+{{- if .Values.app.subPath }}
+           subPath: {{ .Values.app.subPath }}
+{{- end }}
+         - name: basic-auth
+           mountPath: /etc/mlflow/basic_auth.ini
+           subPath: basic_auth.ini 
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Values.app.existingClaimName | default (printf "pvc-%s-data" (.Release.Name)) }}
+      - name: basic-auth
+        configMap:
+          name: {{ .Release.Name }}-auth-ini 

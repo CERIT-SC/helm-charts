@@ -1,0 +1,19 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.name }}-kubeapi-np
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- range $key, $value := .Values.networkPolicy.matchLabels }}
+      {{ $key }}: {{ $value }}
+      {{- end }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: {{ .Values.networkPolicy.cidr }}
+{{- end }}

@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  schedule: {{ .Values.app.cronschedule }} 
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec: 
+      parallelism: 1
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 120
+      template:
+        metadata:
+          labels:
+            app: {{ .Release.Name }}
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: mlflow
+            image: cerit.io/rationai/mflow:{{ .Chart.AppVersion }}
+            imagePullPolicy: Always
+            command: ['/bin/sh', '-c', 'cd /tmp; export DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@{{ .Values.db.name }}-rw:5432/mlflow; mlflow gc --older-than {{ .Values.app.gcdays }} --backend-store-uri="$DATABASE_URL"']
+            env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.name }}-db-app
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.name }}-db-app
+                  key: password
+            - name: MLFLOW_HTTP_REQUEST_TIMEOUT
+              value: '600'
+            - name: MLFLOW_TRACKING_URI
+              value: 'http://{{ .Release.Name }}:5000'
+            securityContext:
+              runAsUser: 1001
+              runAsGroup: 1001
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+              privileged: false
+              seccompProfile:
+                type: RuntimeDefault
+            resources:
+              limits:
+               cpu: 1
+               memory: '2Gi' 
+            volumeMounts:
+             - name: data
+               mountPath: /data
+{{- if .Values.app.subPath }}
+               subPath: {{ .Values.app.subPath }}
+{{- end }}
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: {{ .Values.app.existingClaimName | default (printf "pvc-%s-data" (.Release.Name)) }}
+

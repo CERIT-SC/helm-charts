@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+{{- range $key, $val := .Values.ingressAnnotations }}
+    {{ $key }}: {{ $val | quote }}
+{{- end }}
+    kubernetes.io/ingress.class: nginx
+    kubernetes.io/tls-acme: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+{{- if .Values.secure }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: "10.18.0.54,10.18.0.56,10.18.0.60,10.18.0.62,10.18.0.67,10.18.0.68,10.18.0.70,10.18.0.71,10.18.0.77,10.18.0.78,10.18.0.80,10.18.0.81,10.18.0.82,10.18.0.83,2001:718:801:390:10:18:0:60,10.18.0.84,2001:718:801:390:10:18:0:54,10.18.0.58,10.18.0.55,10.18.0.57,10.18.0.88,10.18.0.92,10.18.0.94,10.18.0.95,10.18.0.96,10.18.0.97,10.18.0.98,10.18.0.100,10.18.0.109,10.18.0.108,10.18.0.86,10.18.0.111,2001:718:801:390:10:18:0:88,10.18.0.147,10.18.0.148,10.18.0.210,10.18.0.59,10.18.0.213,10.18.0.219,10.18.0.108,10.18.0.220,10.18.0.221,10.18.0.222,10.18.0.223,10.18.0.225,10.18.0.226,10.18.0.230,2001:718:801:0390:10:18:0:230,10.18.0.232,2001:718:801:390:10:18:0:57,2001:718:801:390:10:18:0:114,10.18.0.114"
+{{- end }}
+spec:
+  tls:
+   - hosts:
+       - {{ .Values.ingress.host }}
+     secretName: {{ .Values.ingress.host | replace "." "-" }} 
+  rules:
+  - host: {{ .Values.ingress.host }}
+    http:
+      paths:
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: {{ .Release.Name }} 
+              port:
+                number: 5000

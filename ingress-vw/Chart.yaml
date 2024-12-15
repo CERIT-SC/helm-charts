@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ingress-vw
+description: A Helm chart for deploying ingress validating webhook with additional rules.
+type: application
+appVersion: "0.2"
+version: "0.3.3"

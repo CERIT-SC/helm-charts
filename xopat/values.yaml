@@ -1,0 +1,52 @@
+db:
+  postgresversion: '14.7-11'
+  dbname: postgresdb
+  dbuser: browser
+  initdb: true
+  proxyenv: false
+  storageclass: nfs-csi
+  backup:
+    enabled: false
+    key:
+    secret: 
+    bucket: 
+
+data:
+  createPVC: false
+  storageClass: []
+  # i guess this should always be other pvc from mlflow. Maybe include it as subchart and have one values?? i'm not going to worry about pvc creation rb as i have existing claims
+  mlflowAFStorage:
+    existingClaim: biomedai-school-pvc
+    subPath: "mlflow"
+# does this cancer storage exist always in xopat?
+  cancerStorage:
+    existingClaim: biomedai-school-pvc
+    subPath: "hub-user-data"
+
+ 
+
+ingress:
+  host: "dd" 
+  miraximporter:
+    pathprefix: '/importer'
+  viewer:
+    pathprefix: '/'
+
+# importer disabled but its pvc is not solved AT ALL
+miraximporter:
+  deploy: true
+  analysispath: 'importer/server/analysis.php' 
+  gittag: 'kubernetes'
+  auth:
+   enabled: true
+   user: r 
+   password: f 
+
+viewer:
+  image: "cerit.io/xopat/viewer:jammy"
+  deploy: true
+  gittags:
+   viewer: 'kubernetes'
+   browser: 'kubernetes'
+  auth:
+   enabled: true # credentials same as miraximporter

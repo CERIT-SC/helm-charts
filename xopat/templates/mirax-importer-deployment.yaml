@@ -1,0 +1,140 @@
+{{ if .Values.miraximporter.deploy }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name}}-mirax-importer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name}}-mirax-importer
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name}}-mirax-importer
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+        fsGroup: 33
+      initContainers:
+      - name: git
+        image: cerit.io/docker/alpine/git
+        imagePullPolicy: IfNotPresent
+        command: [ '/bin/sh', '-c', 'cd /mnt/importer && rm -rf * .[a-z]* && export HTTPS_PROXY=http://proxy.ics.muni.cz:3128 && git clone --single-branch --branch {{ .Values.miraximporter.gittag }}  https://github.com/RationAI/mirax-importer .'] 
+        securityContext:
+          runAsUser: 33
+          runAsGroup: 33
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+        volumeMounts:
+        - name: importer
+          mountPath: /mnt/importer
+      containers:
+      - name: mirax-importer
+        image: cerit.io/xopat/mirax-importer:php8.1
+        imagePullPolicy: Always
+        env:
+        - name: XO_DB_DRIVER
+          value: pgsql
+        - name: XO_DB_HOST
+          value: {{ .Release.Name}}-{{ .Values.db.dbname }}-rw
+        - name: XO_DB_PORT
+          value: '5432'
+        - name: XO_DB_NAME
+          value: {{ .Values.db.dbname }}
+        - name: XO_DB_USER
+          value: {{ .Values.db.dbuser }}
+        - name: XO_MIRAX_KUBERNETES
+          value: 'true'
+        - name: XO_BASIC_AUTH
+          value: '1'
+        - name: XO_MIRAX_SERVER_BASIC_AUTH
+          valueFrom:
+           secretKeyRef:
+            key: auth
+            name: {{ .Release.Name}}-htpasswd
+        - name: XO_DB_PASS
+          valueFrom:
+            secretKeyRef:
+             key: password
+             name: {{ .Release.Name }}-{{ .Values.db.dbname }}-app   
+        - name: XO_MIRAX_SERVER_URL
+          value: https://{{ .Values.ingress.host }}/importer/server 
+        - name: XO_KUBE_PVC
+{{- if .Values.data.existingClaim }}
+          value: {{ .Values.data.existingClaim }}
+{{- else }}
+          value: {{ .Release.Name }}-pvc
+{{ end }}
+        securityContext:                               
+          runAsUser: 33 
+          runAsGroup: 33
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+        resources:
+          limits:
+            cpu: 1
+            memory: 4Gi
+        ports:
+        - containerPort: 8081
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+          httpGet:
+            path: /health/
+            port: 8081
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
+          httpGet:
+            path: /health/
+            port: 8081
+        volumeMounts:
+        - name: data
+          mountPath: /var/www/data
+          subPath: {{ .Values.data.subPath }}
+        - name: importer
+          mountPath: /var/www/html/importer
+{{- if .Values.viewer.auth.enabled }}
+        - name: htpasswd
+          mountPath: /usr/local/etc/apache/.htpasswd
+          subPath: .htpasswd
+{{- end }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+{{- if .Values.data.existingClaim }}
+          claimName: {{ .Values.data.existingClaim }}
+{{- else }}
+          claimName: {{ .Release.Name }}-pvc
+{{ end }}
+      - name: importer
+        emptyDir: {}
+{{- if .Values.viewer.auth.enabled }}
+      - name: htpasswd
+        projected:
+          defaultMode: 420
+          sources:
+          - secret:
+              items:
+              - key: htpasswd
+                path: .htpasswd
+              name: {{ .Release.Name}}-htpasswd
+{{- end }}
+{{ end }}

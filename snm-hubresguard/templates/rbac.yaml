@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1 
+kind: ClusterRole                                                                      
+metadata:                                                                       
+  name: snm-hubresguard-pod-cr                                           
+rules:                                                                          
+- apiGroups: [""]                                                               
+  resources: ["pods"]                                                           
+  verbs: ["get", "watch", "list", "patch", "delete"]                            
+- apiGroups: [""]                                                               
+  resources: ["namespaces"]                                                     
+  verbs: ["get", "watch", "list"]                            
+---                                                                             
+apiVersion: rbac.authorization.k8s.io/v1                                        
+kind: ClusterRoleBinding                                                        
+metadata:                                                                       
+  name: {{ .Release.Name }}-snm-hubresguard-pod-crb                                           
+subjects:                                                                       
+- kind: ServiceAccount                                                          
+  name: hubresguard-sa                                                          
+  namespace: {{ .Values.namespace }}                                                        
+roleRef:                                                                        
+  kind: ClusterRole                                                             
+  name: snm-hubresguard-pod-cr 
+  apiGroup: rbac.authorization.k8s.io

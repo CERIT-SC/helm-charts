@@ -1,0 +1,59 @@
+{{ $ns := .Values.namespace }}
+{{ $sjhl := .Values.cronjob.successfulJobsHistoryLimit }}
+{{ $fjhl := .Values.cronjob.failedJobsHistoryLimit }}    
+{{ $schedule := .Values.cronjob.schedule | quote }}    
+{{ $ttlaf := .Values.cronjob.ttlSecondsAfterFinished }}  
+{{ $backofflimit := .Values.cronjob.backoffLimit }}      
+{{ $image := .Values.cronjob.image }}      
+{{ $hours := .Values.cronjob.hours | quote }}
+{{ $wsdl := .Values.cronjob.wsdlUrl | quote }}  
+{{ $csc := toYaml $.Values.containerSC }}
+{{ $volumeMounts := toYaml $.Values.volumeMounts }}
+{{ $cjsc := toYaml $.Values.cjSC }}
+{{ $volumes := toYaml .Values.volumes }}
+{{ $label := .Values.label }}
+{{ range $index, $node := (lookup "v1" "Node" "" "").items }}
+{{ $parts := split "." $node.metadata.name }}
+{{ if hasKey $node.metadata.labels $label }}  
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+ name: epcpsimulator-{{ $parts._0 }}-cj
+ namespace: {{ $ns }}
+spec:
+  successfulJobsHistoryLimit: {{ $sjhl }}
+  failedJobsHistoryLimit: {{ $fjhl }}
+  concurrencyPolicy: "Forbid"
+  schedule: {{ $schedule }}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ $ttlaf }}
+      backoffLimit: {{ $backofflimit }}
+      completions: 1
+      parallelism: 1
+      template:
+        spec:
+          nodeName: {{ $node.metadata.name }}
+          containers:
+          - name: epcp-simulator-container
+            image: {{ $image }} 
+            imagePullPolicy: IfNotPresent
+            command:
+            - "epcp"
+            env:
+              - name: "HOURS"
+                value: {{ $hours }}
+              - name: "WSDL"
+                value: {{ $wsdl }}
+            securityContext:
+              {{- $csc | nindent 14 }}
+            volumeMounts:
+              {{- $volumeMounts | nindent 14 }}
+          restartPolicy: OnFailure
+          securityContext:
+            {{- $cjsc | nindent 12 }}
+          volumes:
+            {{- $volumes | nindent 12 }}
+---
+{{ end }}
+{{ end }}

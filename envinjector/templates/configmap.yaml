@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-cm
+  namespace: {{ .Values.namespace }}
+data:
+  envs:  |
+  {{- range $k, $v := .Values.envs }}
+    {{$k}}={{$v}}  
+  {{- end }}

@@ -1,0 +1,60 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.db.name }}
+spec:
+  instances: {{ .Values.db.instances }}
+
+  imageName: 'ghcr.io/cloudnative-pg/postgresql:{{ .Values.db.version }}'
+
+  primaryUpdateStrategy: unsupervised
+
+  bootstrap:
+    initdb:
+      database: {{ .Values.db.name }}
+      owner: {{ .Values.db.owner }}
+      secret:
+        name: {{ .Values.db.name }}-db-app 
+{{ if gt (int .Values.db.instances) 1 }}
+{{- if eq .Values.db.affinity "kubh" }}
+  affinity:
+    enablePodAntiAffinity: true 
+    topologyKey: cerit.io/region
+    podAntiAffinityType: required 
+{{- end }} 
+
+  replicationSlots:
+    highAvailability:
+      enabled: true
+{{- end }}
+
+  postgresql:
+    parameters:
+      wal_keep_size: 5GB
+
+  resources:
+    requests:
+      memory: {{ .Values.db.resources.requests.memory }}
+      cpu: {{ .Values.db.resources.requests.cpu }}
+    limits:
+      memory: {{ .Values.db.resources.limits.memory }}
+      cpu: {{ .Values.db.resources.limits.cpu }}
+
+  storage:
+    size: {{ .Values.db.storage.size }}
+    storageClass: {{ .Values.db.storage.storageClass }}
+
+{{- if .Values.db.backup.enable }}
+  backup:
+    barmanObjectStore:
+      destinationPath: {{ .Values.db.backup.path }}
+      endpointURL: {{ .Values.db.backup.url }}
+      s3Credentials:
+        accessKeyId:
+          name: {{ .Release.Name}}-s3-creds
+          key: ACCESS_KEY_ID
+        secretAccessKey:
+          name: {{ .Release.Name}}-s3-creds
+          key: ACCESS_SECRET_KEY
+    retentionPolicy: "30d"
+{{- end }}

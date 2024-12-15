@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-auth-ini
+data:
+  basic_auth.ini: |-
+{{ .Files.Get "basic_auth.ini" | indent 4 }}

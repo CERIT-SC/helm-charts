@@ -1,0 +1,17 @@
+name:
+namespace:
+
+networkPolicy:                                                                  
+  enabled: false                                                                
+  matchLabels:                                                                  
+    k8s-app: pod-banking-hook-app                                              
+  cidr: 10.16.48.16/28
+
+deployment:
+  image: cerit.io/cerit/podbanking:08-04-2024
+
+influxdb:
+  url: 
+  auth: 
+  bucket:
+  org:

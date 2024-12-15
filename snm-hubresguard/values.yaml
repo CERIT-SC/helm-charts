@@ -1,0 +1,29 @@
+namespace: cashubresguard
+
+cronjob:
+  schedule: "0 8 * * *" # UTC
+  ttlSecondsAfterFinished: 10800 # 3h
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  backoffLimit: 0
+  image: cerit.io/cerit/snm-hubresguard:0.2 
+  notebookNamespace: "cashub-ns"
+  cluster: "kuba"
+  hubAddr: "cashub.cloud.e-infra.cz"
+  queryTime: "86400" # 24h
+  gpuMaxDays: "2"
+  cpuMaxDays: "4"
+
+prometheus:                                                                     
+  credentialsDir: "/mnt/prometheus/" # trailing slash is important!             
+  username: "" # plaintext                                                      
+  password: "" # plaintext                                                      
+  promaddr: # plaintext
+
+influx:
+  credentialsDir: "/mnt/influxdb/"
+  influxdburl: ""
+  influxdbauth: ""
+  org: ""
+  bucket: ""
+  measurement: ""
