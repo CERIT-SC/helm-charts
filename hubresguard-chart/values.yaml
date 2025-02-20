@@ -14,6 +14,8 @@ cronjob:
   queryTime: "86400" # 24h
   gpuMaxDays: "2"
   cpuMaxDays: "7"
+  cpuThreshold: "0.1"
+  gpuThreshold: "0.1"
 
 prometheus:
   credentialsDir: "/mnt/prometheus/" # trailing slash is important!

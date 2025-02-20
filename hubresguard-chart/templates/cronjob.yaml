@@ -44,8 +44,17 @@ spec:
                 value: {{ .Values.cronjob.gpuMaxDays | quote }}
               - name: "CPU_MAX_DAYS"
                 value: {{ .Values.cronjob.cpuMaxDays | quote }}
+              - name: "CPU_THRESHOLD"
+                value: {{ .Values.cronjob.cpuThreshold | quote }}
+              - name: "GPU_THRESHOLD"
+                value: {{ .Values.cronjob.gpuThreshold | quote }}
               - name: "INFLUXDB_PATH"
                 value: {{ .Values.influx.credentialsDir | quote }}
+              - name: NODE_NAME
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: spec.nodeName
             volumeMounts:
               - mountPath: {{ .Values.prometheus.credentialsDir | quote }}
                 name: prometheus-secret
