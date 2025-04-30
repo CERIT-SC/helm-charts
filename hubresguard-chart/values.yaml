@@ -6,7 +6,7 @@ cronjob:
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   backoffLimit: 0
-  image: cerit.io/cerit/hubresguard:12-02-2024
+  image: cerit.io/cerit/hubresguard:20-02-2025
   userNamespace: "jupyterhub-.*-prod-ns"# namespace where check resources. Regex!
   jhNamespace: "jupyterhub-ns"
   cluster: "kuba"

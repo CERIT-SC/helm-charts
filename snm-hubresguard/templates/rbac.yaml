@@ -1,3 +1,5 @@
+{{- $cr := lookup "rbac.authorization.k8s.io/v1" "ClusterRole" "" "snm-hubresguard-pod-cr" }}
+{{ if not $cr }}
 apiVersion: rbac.authorization.k8s.io/v1 
 kind: ClusterRole                                                                      
 metadata:                                                                       
@@ -8,8 +10,9 @@ rules:
   verbs: ["get", "watch", "list", "patch", "delete"]                            
 - apiGroups: [""]                                                               
   resources: ["namespaces"]                                                     
-  verbs: ["get", "watch", "list"]                            
----                                                                             
+  verbs: ["get", "watch", "list"]
+---
+{{ end }}
 apiVersion: rbac.authorization.k8s.io/v1                                        
 kind: ClusterRoleBinding                                                        
 metadata:                                                                       

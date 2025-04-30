@@ -18,7 +18,7 @@ prometheus:
   credentialsDir: "/mnt/prometheus/" # trailing slash is important!             
   username: "" # plaintext                                                      
   password: "" # plaintext                                                      
-  promaddr: # plaintext
+  promaddr: ""# plaintext
 
 influx:
   credentialsDir: "/mnt/influxdb/"

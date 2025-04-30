@@ -3,4 +3,4 @@ name: snm-hubresguard
 description: A Helm chart for resource utility for JupyterHub with notebooks in the same namespace; monitoring based
 type: application
 appVersion: "0.1"
-version: "0.1.2"
+version: "0.1.3"
