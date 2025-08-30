@@ -18,7 +18,7 @@ spec:
           restartPolicy: Never
           containers:
           - name: mlflow
-            image: cerit.io/rationai/mflow:{{ .Chart.AppVersion }}
+            image: cerit.io/rationai/mlflow:{{ .Chart.AppVersion }}
             imagePullPolicy: Always
             command: ['/bin/sh', '-c', 'cd /tmp; export DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@{{ .Values.db.name }}-rw:5432/mlflow; mlflow gc --older-than {{ .Values.app.gcdays }} --backend-store-uri="$DATABASE_URL"']
             env:
