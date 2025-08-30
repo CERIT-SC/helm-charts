@@ -1,3 +1,30 @@
+{{- /* Create mappings for volume names and their configurations */}}
+{{- $volumeMappings := dict }}
+{{- $usedClaims := dict }}
+
+{{- /* Process mlflowAFStorage */}}
+{{- if .Values.data.mlflowAFStorage.existingClaim }}
+  {{- if not (hasKey $usedClaims .Values.data.mlflowAFStorage.existingClaim) }}
+    {{- $_ := set $usedClaims .Values.data.mlflowAFStorage.existingClaim "data" }}
+  {{- end }}
+  {{- $_ := set $volumeMappings "mlflow" (dict "claim" .Values.data.mlflowAFStorage.existingClaim "subPath" .Values.data.mlflowAFStorage.subPath) }}
+{{- end }}
+
+{{- /* Process cancerStorage */}}
+{{- if .Values.data.cancerStorage.existingClaim }}
+  {{- if not (hasKey $usedClaims .Values.data.cancerStorage.existingClaim) }}
+    {{- $_ := set $usedClaims .Values.data.cancerStorage.existingClaim "cancer-data" }}
+  {{- end }}
+  {{- $_ := set $volumeMappings "cancer" (dict "claim" .Values.data.cancerStorage.existingClaim "subPath" .Values.data.cancerStorage.subPath) }}
+{{- end }}
+
+{{- /* Process dataHubStorage */}}
+{{- if .Values.data.dataHubStorage.existingClaim }}
+  {{- if not (hasKey $usedClaims .Values.data.dataHubStorage.existingClaim) }}
+    {{- $_ := set $usedClaims .Values.data.dataHubStorage.existingClaim "datahub" }}
+  {{- end }}
+  {{- $_ := set $volumeMappings "datahub" (dict "claim" .Values.data.dataHubStorage.existingClaim "subPath" .Values.data.dataHubStorage.subPath) }}
+{{- end }}
 {{ if .Values.viewer.deploy }}
 apiVersion: apps/v1
 kind: Deployment
@@ -111,46 +138,37 @@ spec:
           mountPath: /usr/local/etc/apache/.htpasswd
           subPath: .htpasswd
 {{- end }}
+{{- /* Mount mlflow storage */}}
+{{- if .Values.data.mlflowAFStorage.existingClaim }}
+        - name: {{ index $usedClaims .Values.data.mlflowAFStorage.existingClaim }}
+          mountPath: /path/for/mlflow  # Adjust to your actual path
+          {{- if .Values.data.mlflowAFStorage.subPath }}
+          subPath: {{ .Values.data.mlflowAFStorage.subPath }}
+    {{- end }}
+{{- end }}
+
+{{- /* Mount cancer storage */}}
 {{- if .Values.data.cancerStorage.existingClaim }}
-{{- if ne .Values.data.cancerStorage.existingClaim .Values.data.mlflowAFStorage.existingClaim }}
-        - name: cancer-data
-{{- else }}
-        - name: data
-{{- end }}
-          mountPath: /var/www/data/hub
-{{- if .Values.data.cancerStorage.subPath }}
+        - name: {{ index $usedClaims .Values.data.cancerStorage.existingClaim }}
+          mountPath: /var/www/data/hub  # Your specified path
+          {{- if .Values.data.cancerStorage.subPath }}
           subPath: {{ .Values.data.cancerStorage.subPath }}
+    {{- end }}
 {{- end }}
-        - name: datahub
-          mountPath: /mnt/data/hub
-{{- if .Values.data.dataHubStorage.subPath }}
+
+{{- /* Mount datahub storage */}}
+{{- if .Values.data.dataHubStorage.existingClaim }}
+        - name: {{ index $usedClaims .Values.data.dataHubStorage.existingClaim }}
+          mountPath: /mnt/data/hub  # Your specified path
+          {{- if .Values.data.dataHubStorage.subPath }}
           subPath: {{ .Values.data.dataHubStorage.subPath }}
-{{- end }}
+    {{- end }}
 {{- end }}
       volumes:
       - name: browser
         emptyDir: {}
       - name: viewer
         emptyDir: {}
-      - name: data
-        persistentVolumeClaim:
-      {{- if .Values.data.mlflowAFStorage.existingClaim }}
-          claimName: {{ .Values.data.mlflowAFStorage.existingClaim }}
-{{- else }}
-          claimName: {{ .Release.Name }}-pvc
-{{ end }}
-{{- if ne .Values.data.cancerStorage.existingClaim .Values.data.mlflowAFStorage.existingClaim }}
-{{- if .Values.data.cancerStorage.existingClaim }}
-      - name: cancer-data
-        persistentVolumeClaim:
-          claimName: {{ .Values.data.cancerStorage.existingClaim }}
-{{- end }}
-{{- end }}
-{{- if .Values.data.dataHubStorage.existingClaim }}
-      - name: datahub
-        persistentVolumeClaim:
-          claimName: {{ .Values.data.dataHubStorage.existingClaim }}
-{{- end }}
 {{- if .Values.viewer.auth.enabled }}
       - name: htpasswd
         projected:
@@ -161,5 +179,15 @@ spec:
               - key: htpasswd
                 path: .htpasswd
               name: {{ .Release.Name}}-htpasswd
+{{- end }}
+{{- range $claimName, $volumeName := $usedClaims }}
+      - name: {{ $volumeName }}
+        persistentVolumeClaim:
+          claimName: {{ $claimName }}
+{{- end }}
+{{- if eq (len $usedClaims) 0 }}
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-pvc
 {{- end }}
 {{ end }}
