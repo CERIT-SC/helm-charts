@@ -124,11 +124,6 @@ spec:
             path: /health/
             port: 8080
         volumeMounts:
-        - name: data
-          mountPath: /var/www/data/mlflow
-{{- if .Values.data.mlflowAFStorage.subPath }}
-          subPath: {{ .Values.data.mlflowAFStorage.subPath }}
-{{- end }}
         - name: viewer
           mountPath: /var/www/html/xopat
         - name: browser
@@ -141,7 +136,7 @@ spec:
 {{- /* Mount mlflow storage */}}
 {{- if .Values.data.mlflowAFStorage.existingClaim }}
         - name: {{ index $usedClaims .Values.data.mlflowAFStorage.existingClaim }}
-          mountPath: /path/for/mlflow  # Adjust to your actual path
+          mountPath: /var/www/data/mlflow 
           {{- if .Values.data.mlflowAFStorage.subPath }}
           subPath: {{ .Values.data.mlflowAFStorage.subPath }}
     {{- end }}

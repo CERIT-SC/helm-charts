@@ -1,0 +1,53 @@
+db:
+  postgresversion: '14.8-2'
+  dbname: postgresdb
+  dbuser: browser
+  initdb: true
+  proxyenv: false
+  storageclass: nfs-csi
+  backup:
+    enabled: false
+    key:
+    secret: 
+    bucket: 
+
+data:                                                                           
+  createPVC: false
+  mlflowAFStorage:                                                              
+    existingClaim: pvc-mlflow-fleet-data
+    storageClass: []                                                            
+    subPath: 
+  cancerStorage:                                                                
+    existingClaim: biomedai-summer-school-ro-pvc 
+    storageClass: []                                                            
+    subPath: "Public/summer_school"
+  dataHubStorage:                                                                
+    existingClaim: biomedai-summer-school-ro-pvc 
+    storageClass: []                                                            
+    subPath: "Public/summer_school"
+
+ingress:
+  host: "biomedai-summer-xopat.dyn.cloud.e-infra.cz"
+  miraximporter:
+    pathprefix: '/importer'
+  viewer:
+    pathprefix: '/'
+
+
+miraximporter:
+  deploy: false
+  analysispath: 'importer/server/analysis.php' 
+  gittag: 'kubernetes'
+  auth:
+   enabled: true
+   user: biomedai
+   password: biomedaischool2025
+
+viewer:
+  image: "cerit.io/xopat/viewer:jammy"
+  deploy: true
+  gittags:
+   viewer: 'kubernetes-mlflow'
+   browser: 'kubernetes-mlflow'
+  auth:
+   enabled: true # credentials same as miraximporter
