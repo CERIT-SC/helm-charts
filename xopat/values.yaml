@@ -22,6 +22,10 @@ data:
   cancerStorage:
     existingClaim: biomedai-school-pvc
     subPath: "hub-user-data"
+  dataHubStorage:
+    existingClaim: biomedai-summer-school-ro-pvc
+    storageClass: []
+    subPath: "Public/summer_school"
 
  
 

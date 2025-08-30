@@ -121,6 +121,11 @@ spec:
 {{- if .Values.data.cancerStorage.subPath }}
           subPath: {{ .Values.data.cancerStorage.subPath }}
 {{- end }}
+        - name: datahub
+          mountPath: /mnt/data/hub
+{{- if .Values.data.dataHubStorage.subPath }}
+          subPath: {{ .Values.data.dataHubStorage.subPath }}
+{{- end }}
 {{- end }}
       volumes:
       - name: browser
@@ -140,6 +145,11 @@ spec:
         persistentVolumeClaim:
           claimName: {{ .Values.data.cancerStorage.existingClaim }}
 {{- end }}
+{{- end }}
+{{- if .Values.data.dataHubStorage.existingClaim }}
+      - name: datahub
+        persistentVolumeClaim:
+          claimName: {{ .Values.data.dataHubStorage.existingClaim }}
 {{- end }}
 {{- if .Values.viewer.auth.enabled }}
       - name: htpasswd
